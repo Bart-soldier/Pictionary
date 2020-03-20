@@ -10,6 +10,12 @@ L'adresse de l'application est : https://clerc-dejaham-pictionary.herokuapp.com/
  
 ### Installation d'Heroku :
  - curl https://cli-assets.heroku.com/install.sh | sh
+ 
+### Installation de yarn :
+ - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+ - sudo tee /etc/apt/sources.list.d/yarn.list
+ - sudo apt update
+ - sudo apt install yarn
 
 ## Commandes Git
 
@@ -44,7 +50,7 @@ L'adresse de l'application est : https://clerc-dejaham-pictionary.herokuapp.com/
  - heroku logs --tail
  
 ### Pour lancer l'application localement
- - npm install
- - heroku local web
+ - yarn build
+ - yarn start
  
- L'adresse locale est : http://localhost:5000/
+ L'adresse locale est : http://localhost:8080/
