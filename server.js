@@ -1,4 +1,4 @@
-//server.jsconst
+//server.js
 
 const express = require('express');
 const favicon = require('express-favicon');
