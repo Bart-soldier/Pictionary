@@ -26,7 +26,7 @@ L'adresse de l'application est : https://clerc-dejaham-pictionary.herokuapp.com/
 
 ## Commandes Heroku
 
-### Connection
+### Connexion
  - heroku login
  
 ### Déployer l'application
@@ -40,7 +40,7 @@ L'adresse de l'application est : https://clerc-dejaham-pictionary.herokuapp.com/
 ### Créer une instance de l'application (1 = on, 0 = off)
  - heroku ps:scale web=1
 
-### Voir l'historique des connections
+### Voir l'historique des connexions
  - heroku logs --tail
  
 ### Pour lancer l'application localement
