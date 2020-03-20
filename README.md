@@ -1,3 +1,21 @@
+# pictionary
+
+## Pré-requis
+
+Installation de nodejs et npm :
+ - curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+ - sudo apt install nodejs
+ 
+Installation d'Heroku :
+ - curl https://cli-assets.heroku.com/install.sh | sh
+
+## Commandes Heroku
+
+Se connecter :
+ - heroku login
+ 
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
@@ -66,4 +84,3 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 ### `npm run build` fails to minify
 
 This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
-# pictionary
