@@ -49,6 +49,8 @@ L'adresse de l'application est : https://clerc-dejaham-pictionary.herokuapp.com/
 ### Voir l'historique des connexions
  - heroku logs --tail
  
+## Commandes yarn
+ 
 ### Pour lancer l'application localement
  - yarn build
  - yarn start
