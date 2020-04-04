@@ -35,6 +35,9 @@ L'adresse de l'application est : https://clerc-dejaham-pictionary.herokuapp.com/
 ### Connexion
  - heroku login
  
+### Lier le Git au Git d'Heroku
+ - heroku git:remote -a clerc-dejaham-pictionary
+ 
 ### Déployer l'application
  - git add .
  - git commit -m "Message"
