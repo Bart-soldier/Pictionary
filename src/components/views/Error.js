@@ -1,5 +1,4 @@
 import React from 'react';
-//import '../stylesheets/default.css';
 
 const Error = () => {
     return (

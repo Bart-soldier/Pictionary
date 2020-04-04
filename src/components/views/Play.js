@@ -1,7 +1,4 @@
 import React from 'react';
-//import '../stylesheets/default.css';
-//import '../scripts/draw.js';
-//import '../../../node_modules/jquery/dist/jquery.min.js';
 
 const Play = () => {
     return (
