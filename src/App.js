@@ -3,7 +3,6 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
 import Home from './components/views/Home';
 import Play from './components/views/Play';
-import Contact from './components/views/Contact';
 import Error from './components/views/Error';
 import Navigation from './components/views/Navigation';
 
@@ -16,7 +15,6 @@ class App extends Component {
             <Switch>
              <Route path="/" component={Home} exact/>
              <Route path="/play" component={Play}/>
-             <Route path="/contact" component={Contact}/>
              <Route path='*' component={Error} />
             <Route component={Error}/>
            </Switch>

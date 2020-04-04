@@ -41,6 +41,7 @@
     <!--
       Import de feuilles de styles et de scriptes internes.
     -->
+
     <script src="../node_modules/jquery/dist/jquery.min.js" type="text/javascript"></script>
     <script src="../src/components/scripts/draw.js" type="text/javascript"></script>
 
@@ -50,16 +51,25 @@
 
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+    <div className="jumbotron text-center">
+      <div className="container">
+        <h1>Projet Application Web</h1>
+      </div>
+    </div>
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
+    <div className="container">
+    <!-- Partie chargée par le serveur -->
+      <div id="root"></div>
+    </div>
+
+    <div className="w3-container w3-black w3-center w3-opacity w3-padding-64">
+        <h1 className="w3-margin w3-xlarge">Team members :</h1>
+        <h1 className="w3-margin w3-xlarge">CLERC Billy & de JAHAM Charles</h1>
+    </div>
+
+    <footer className="w3-container w3-padding-64 w3-center w3-opacity">
+      <p>Original website template provided by <a href="https://www.heroku.com/" target="_blank">Heroku</a> and <a href="https://www.w3schools.com/" target="_blank">w3schools.com</a></p>
+    </footer>
   </body>
 </html>
