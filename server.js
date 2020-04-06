@@ -24,15 +24,19 @@ app.get('/*', function (req, res) {
 // On créer un serveur avec l'application
 server.listen(port, () => console.log(`Listening on port ${port}.`));
 
+// Nombre de client connectés
+var clientNb = 0;
+
 // On dédie un socket à la page play
 var play = io
   .of('/play')
 
   // Quand un client se connecte
   .on('connection', function (socket) {
+    clientNb++;
     console.log('Client connecté !');
     // On envoi un message au client
-    socket.emit('check', 'Tu es bien connecté !');
+    socket.emit('check', {message: 'Tu es bien connecté !', clientNb: clientNb});
     // On envoi un message à tous les clients connecté à la page
     play.emit('checkAll', 'Un nouveau client est connecté');
 
