@@ -27,7 +27,6 @@ $(document).ready(function(){
     alert(data.message);
     alreadyWarned = true;
     clientNb = data.clientNb;
-    alert(clientNb);
   });
 
   socket.on('checkAll', function(message) {
@@ -43,6 +42,7 @@ $(document).ready(function(){
 
   // Pour le moment, le premier client connecté est le seul à pouvoir dessiner
   if(clientNb == 1) {
+    alert('I am ' + clientNb);
     // Pour chaque évènement de la souris
 
     // On clic avec la souris
