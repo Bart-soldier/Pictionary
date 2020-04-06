@@ -36,13 +36,13 @@ const Play = () => {
 
               <div class="column right">
                 <div id="chat">
-                  <form action="/" method="post" id="formulaire_chat">
-                    <input type="text" name="message" id="message" placeholder="Votre message..." size="50" autofocus />
-                    <input type="submit" id="envoi_message" value="Envoyer" />
-                  </form>
-
                   <section id="zone_chat">
                   </section>
+
+                  <form action="/" method="post" id="formulaire_chat">
+                    <input type="text" name="message" id="message" placeholder="Votre message..." autofocus />
+                    <input type="submit" id="envoi_message" value="Envoyer" />
+                  </form>
                 </div>
               </div>
             </div>

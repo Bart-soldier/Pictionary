@@ -18,9 +18,9 @@ $(document).ready(function(){
   drawing = false;
 
   // URL locale
-  //const url = 'http://localhost:8080/play';
+  const url = 'http://localhost:8080/play';
   // URL Heroku
-  const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
+  //const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
 
   // Connexion socket.io
   const socket = io.connect(url);
@@ -39,17 +39,17 @@ $(document).ready(function(){
 
   // Quand un nouveau client se connecte
   socket.on('new_client', function(pseudo) {
-    $('#zone_chat').prepend('<p><em>' + pseudo + ' a rejoint le Chat !</em></p>');
+    $('#zone_chat').append('<p><em>' + pseudo + ' a rejoint le Chat !</em></p>');
   });
 
   // Quand un nouveau client se déconnecte
   socket.on('leaving_client', function(pseudo) {
-    $('#zone_chat').prepend('<p><em>' + pseudo + ' a quitté le Chat !</em></p>');
+    $('#zone_chat').append('<p><em>' + pseudo + ' a quitté le Chat !</em></p>');
   });
 
   // Quand on reçoit un message du serveur
   socket.on('chatMessage', function(data) {
-    $('#zone_chat').prepend('<p><strong>' + data.pseudo + '</strong> ' + data.message + '</p>');
+    $('#zone_chat').append('<p><strong>' + data.pseudo + '</strong> ' + data.message + '</p>');
   });
 
   // Quand on envoie le formulaire

@@ -94,9 +94,19 @@ canvas {
 }
 
 #conteneur{
-    width:500px;
-    margin-left:auto;
-    margin-right:auto;
+  width:500px;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+#chat{
+  height:500px;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow: auto;
+  border-left:1em solid transparent;
+  border-right:1em solid transparent;
+  background-color: #f1f1f1;
 }
 
 .column {
