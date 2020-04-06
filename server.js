@@ -36,7 +36,7 @@ var play = io
     clientNb++;
     console.log('Client connecté !');
     // On envoi un message au client
-    socket.emit('check', {message: 'Tu es bien connecté !', clientNb: clientNb});
+    socket.emit('check', {message: `Bienvenue, client ${clientNb}`, clientNb: clientNb});
     // On envoi un message à tous les clients connecté à la page
     play.emit('checkAll', 'Un nouveau client est connecté');
 

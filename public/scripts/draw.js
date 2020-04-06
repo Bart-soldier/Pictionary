@@ -24,7 +24,7 @@ $(document).ready(function(){
   const socket = io.connect(url);
   // Confirmation de connexion
   socket.on('check', function(data) {
-    alert(data.message);
+    alert(data.message + clientNb);
     alreadyWarned = true;
     clientNb = data.clientNb;
   });
