@@ -45,11 +45,11 @@ var play = io
       // On le retransmet aux autres clients connectés
       play.emit('drawingAction', message);
     })
-  })
 
-  .on('disconnect', function() {
-    console.log('Client déconnecté !');
-  });
+    socket.on('disconnect', function() {
+      console.log('Client déconnecté !');
+    });
+  })
 
 /*
 io.on('connection', function (socket) {

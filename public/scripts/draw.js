@@ -40,132 +40,129 @@ $(document).ready(function(){
   Pour le client qui dessine
   **************************************/
 
-  // Pour le moment, le premier client connecté est le seul à pouvoir dessiner
-  if(clientNb == 1) {
-    alert('I am ' + clientNb);
-    // Pour chaque évènement de la souris
+  // Pour chaque évènement de la souris
 
-    // On clic avec la souris
-    $("#whiteboard").mousedown(function(e){
-      // On dessine
-      drawing = true;
-      // Commence un nouveau chemin (avec la couleur et la largeur actuelle)
-      context.beginPath();
+  // On clic avec la souris
+  $("#whiteboard").mousedown(function(e){
+    // On dessine
+    drawing = true;
+    // Commence un nouveau chemin (avec la couleur et la largeur actuelle)
+    context.beginPath();
 
-      // Début du chemin au point actuel
+    // Début du chemin au point actuel
+    var x = e.pageX - canvas.offsetLeft;
+    var y = e.pageY - canvas.offsetTop;
+    context.moveTo(x,y);
+
+    // On envoi un message au serveur
+    socket.emit('drawingAction', {type: 'mousedown', client: clientNb, x: x, y: y});
+  })
+
+  // On relâche avec la souris
+  $("#whiteboard").mouseup(function(e){
+    // On arrête de dessiner
+    drawing = false;
+
+    // On envoi un message au serveur
+    socket.emit('drawingAction', {type: 'mouseup', client: clientNb});
+  })
+
+  // On sort de la zone de dessin
+  $("#whiteboard").mouseout(function(e){
+    // On arrête de dessiner
+    drawing = false;
+
+    // On envoi un message au serveur
+    socket.emit('drawingAction', {type: 'mouseout', client: clientNb});
+  })
+
+  // On bouge la souris
+  $("#whiteboard").mousemove(function(e){
+    // Si on est entrain de dessiner
+    if (drawing == true) {
+      // On récupère la position actuelle
       var x = e.pageX - canvas.offsetLeft;
       var y = e.pageY - canvas.offsetTop;
-      context.moveTo(x,y);
+
+      // On dessine une ligne entre les dernières coordonnées
+      // retenues et la position actuelle
+      context.lineTo(x, y);
+      context.stroke();
 
       // On envoi un message au serveur
-      socket.emit('drawingAction', {type: 'mousedown', x: x, y: y});
-    })
+      socket.emit('drawingAction', {type: 'mousemove', client: clientNb, x: x, y: y});
+    }
+  })
 
-    // On relâche avec la souris
-    $("#whiteboard").mouseup(function(e){
-      // On arrête de dessiner
-      drawing = false;
+  // Pour chaque boutons
 
-      // On envoi un message au serveur
-      socket.emit('drawingAction', {type: 'mouseup'});
-    })
+  $("#eraseButton").click(function(){
+    context.clearRect(0, 0, canvas.width, canvas.height);
 
-    // On sort de la zone de dessin
-    $("#whiteboard").mouseout(function(e){
-      // On arrête de dessiner
-      drawing = false;
+    // On envoi un message au serveur
+    socket.emit('drawingAction', {type: 'erase', client: clientNb});
+  })
 
-      // On envoi un message au serveur
-      socket.emit('drawingAction', {type: 'mouseout'});
-    })
+  $("#thinButton").click(function(){
+    context.beginPath();
+    context.lineWidth = 1;
 
-    // On bouge la souris
-    $("#whiteboard").mousemove(function(e){
-      // Si on est entrain de dessiner
-      if (drawing == true) {
-        // On récupère la position actuelle
-        var x = e.pageX - canvas.offsetLeft;
-        var y = e.pageY - canvas.offsetTop;
-
-        // On dessine une ligne entre les dernières coordonnées
-        // retenues et la position actuelle
-        context.lineTo(x, y);
-        context.stroke();
-
-        // On envoi un message au serveur
-        socket.emit('drawingAction', {type: 'mousemove', x: x, y: y});
-      }
-    })
-
-    // Pour chaque boutons
-
-    $("#eraseButton").click(function(){
-      context.clearRect(0, 0, canvas.width, canvas.height);
-
-      // On envoi un message au serveur
-      socket.emit('drawingAction', {type: 'erase'});
-    })
-
-    $("#thinButton").click(function(){
-      context.beginPath();
-      context.lineWidth = 1;
-
-      // On envoi un message au serveur
-      socket.emit('drawingAction', {type: 'thin'});
-    })
+    // On envoi un message au serveur
+    socket.emit('drawingAction', {type: 'thin', client: clientNb});
+  })
 
 
-    $("#thickButton").click(function(){
-      context.beginPath();
-      context.lineWidth = 10;
+  $("#thickButton").click(function(){
+    context.beginPath();
+    context.lineWidth = 10;
 
-      // On envoi un message au serveur
-      socket.emit('drawingAction', {type: 'thick'});
-    })
+    // On envoi un message au serveur
+    socket.emit('drawingAction', {type: 'thick', client: clientNb});
+  })
 
-    $("#blackButton").click(function(){
-      context.beginPath();
-      context.strokeStyle = "#000000";
+  $("#blackButton").click(function(){
+    context.beginPath();
+    context.strokeStyle = "#000000";
 
-      // On envoi un message au serveur
-      socket.emit('drawingAction', {type: 'black'});
-    })
-
-
-    $("#redButton").click(function(){
-      context.beginPath();
-      context.strokeStyle = "#CC0000";
-
-      // On envoi un message au serveur
-      socket.emit('drawingAction', {type: 'red'});
-    })
+    // On envoi un message au serveur
+    socket.emit('drawingAction', {type: 'black', client: clientNb});
+  })
 
 
-    $("#greenButton").click(function(){
-      context.beginPath();
-      context.strokeStyle = "#00CC00";
+  $("#redButton").click(function(){
+    context.beginPath();
+    context.strokeStyle = "#CC0000";
 
-      // On envoi un message au serveur
-      socket.emit('drawingAction', {type: 'green'});
-    })
+    // On envoi un message au serveur
+    socket.emit('drawingAction', {type: 'red', client: clientNb});
+  })
 
 
-    $("#blueButton").click(function(){
-      context.beginPath();
-      context.strokeStyle = "#0000CC";
+  $("#greenButton").click(function(){
+    context.beginPath();
+    context.strokeStyle = "#00CC00";
 
-      // On envoi un message au serveur
-      socket.emit('drawingAction', {type: 'blue'});
-    })
-  }
+    // On envoi un message au serveur
+    socket.emit('drawingAction', {type: 'green', client: clientNb});
+  })
+
+
+  $("#blueButton").click(function(){
+    context.beginPath();
+    context.strokeStyle = "#0000CC";
+
+    // On envoi un message au serveur
+    socket.emit('drawingAction', {type: 'blue', client: clientNb});
+  })
 
   /*************************************
   Pour les autres clients
   **************************************/
 
-  else {
-    // Lorsqu'on reçoit une action liée au dessin
-    socket.on('drawingAction', function(data) {
+  // Lorsqu'on reçoit une action liée au dessin
+  socket.on('drawingAction', function(data) {
+    // Si on est pas le client qui vient de réaliser cette action
+    if(data.client != clientNb) {
       switch(data.type) {
         case 'mousedown':
           // Commence un nouveau chemin (avec la couleur et la largeur actuelle)
@@ -225,6 +222,6 @@ $(document).ready(function(){
           context.beginPath();
           context.strokeStyle = "#0000CC";
       }
-    });
-  }
+    }
+  });
 })
