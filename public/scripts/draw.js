@@ -24,9 +24,10 @@ $(document).ready(function(){
   const socket = io.connect(url);
   // Confirmation de connexion
   socket.on('check', function(data) {
-    alert(data.message + clientNb);
+    alert(data.message);
     alreadyWarned = true;
     clientNb = data.clientNb;
+    alert(clientNb);
   });
 
   socket.on('checkAll', function(message) {
