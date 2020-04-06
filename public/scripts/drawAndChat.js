@@ -18,9 +18,9 @@ $(document).ready(function(){
   drawing = false;
 
   // URL locale
-  const url = 'http://localhost:8080/play';
+  //const url = 'http://localhost:8080/play';
   // URL Heroku
-  //const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
+  const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
 
   // Connexion socket.io
   const socket = io.connect(url);
