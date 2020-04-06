@@ -10,6 +10,8 @@ const port = process.env.PORT || 8080;
 const app = express();
 const server = http.Server(app);
 const io = require('socket.io')(server);
+// Permet de bloquer les caractères HTML (sécurité équivalente à htmlentities en PHP)
+const ent = require('ent');
 
 // On travaille sur l'application
 // the __dirname is the current directory from where the script is running
@@ -24,32 +26,43 @@ app.get('/*', function (req, res) {
 // On créer un serveur avec l'application
 server.listen(port, () => console.log(`Listening on port ${port}.`));
 
-// Nombre de client connectés
-var clientNb = 0;
-
-// On dédie un socket à la page play
 var play = io
+  // On dédie un socket à la page play
   .of('/play')
 
   // Quand un client se connecte
-  .on('connection', function (socket) {
-    clientNb++;
-    console.log('Client connecté !');
-    // On envoi un message au client
-    socket.emit('check', {message: `Bienvenue, client ${clientNb}`, clientNb: clientNb});
-    // On envoi un message à tous les clients connecté à la page
-    play.emit('checkAll', 'Un nouveau client est connecté');
+  .on('connection', function (socket, pseudo) {
+    // Si c'est un nouveau client
+    socket.on('new_client', function(pseudo) {
+      pseudo = ent.encode(pseudo);
+      socket.pseudo = pseudo;
+      // On l'écrit dans le log
+      console.log(`${pseudo} connecté !`);
+      // On envoi un message à tous les clients connectés à la page
+      play.emit('new_client', pseudo);
+    });
 
-    // Quand le client envoie une action de dessin
+    // Quand on reçoit une action de dessin
     socket.on('drawingAction', function(message) {
       // On le retransmet aux autres clients connectés
       play.emit('drawingAction', message);
-    })
-
-    socket.on('disconnect', function() {
-      console.log('Client déconnecté !');
     });
-  })
+
+    // Quand on reçoit un message du chat
+    socket.on('chatMessage', function(message) {
+      // On le retransmet aux autres clients connectés
+      play.emit('chatMessage', {pseudo: socket.pseudo, message: message});
+    });
+
+
+    // Quand le client se déconnecte
+    socket.on('disconnect', function() {
+      // On l'écrit dans le log
+      console.log(`${socket.pseudo} déconnecté !`);
+      // On envoi un message à tous les clients connectés à la page
+      play.emit('leaving_client', socket.pseudo);
+    });
+  });
 
 /*
 io.on('connection', function (socket) {

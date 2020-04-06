@@ -12,28 +12,42 @@ const Play = () => {
 
         <div className="container">
           <center>
-            <div id="conteneur">
-              <canvas id="whiteboard" width="500" height="300">
-                Your browser needs to support canvas in order to be able to play !
-              </canvas>
+            <div class ="row">
+              <div class="column left">
+                <div id="conteneur">
+                  <canvas id="whiteboard" width="500" height="300">
+                    Your browser needs to support canvas in order to be able to play !
+                  </canvas>
 
-              <br/>
-              <button id="eraseButton">Tout effacer</button>
-              <br/><br/>
-              Largeur du trait :
-              <button id="thinButton">Fin</button>
-              <button id="thickButton">Épais</button>
-              <br/><br/>
-              Couleur du trait :
-              <button id="blackButton">Noir</button>
-              <button id="redButton">Rouge</button>
-              <button id="greenButton">Vert</button>
-              <button id="blueButton">Bleu</button>
+                  <br/>
+                  <button id="eraseButton">Tout effacer</button>
+                  <br/><br/>
+                  Largeur du trait :
+                  <button id="thinButton">Fin</button>
+                  <button id="thickButton">Épais</button>
+                  <br/><br/>
+                  Couleur du trait :
+                  <button id="blackButton">Noir</button>
+                  <button id="redButton">Rouge</button>
+                  <button id="greenButton">Vert</button>
+                  <button id="blueButton">Bleu</button>
+                </div>
+              </div>
+
+              <div class="column right">
+                <div id="chat">
+                  <form action="/" method="post" id="formulaire_chat">
+                    <input type="text" name="message" id="message" placeholder="Votre message..." size="50" autofocus />
+                    <input type="submit" id="envoi_message" value="Envoyer" />
+                  </form>
+
+                  <section id="zone_chat">
+                  </section>
+                </div>
+              </div>
             </div>
           </center>
-
           <br/>
-
         </div>
 
         <div className="w3-container w3-black w3-center w3-opacity w3-padding-64">

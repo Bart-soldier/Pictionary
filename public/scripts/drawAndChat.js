@@ -1,14 +1,12 @@
 // draw.js
 
-var url;
 var canvas;
 var context;
 var drawing;
-var alreadyWarned;
+var pseudo;
 
 $(document).ready(function(){
-  //url = 'http://localhost:8080/play';
-  url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
+  // Récupération de la zone de dessin
   canvas = document.getElementById("whiteboard");
   context = canvas.getContext("2d");
   // Largeur du trait par défaut
@@ -16,25 +14,54 @@ $(document).ready(function(){
   // Couleur par défaut
   context.strokeStyle = "#000000";
 
+  // Booléen utilisé pour savoir si on est entrain de dessiner ou non
   drawing = false;
-  alreadyWarned = false;
-  clientNb = -1;
 
-  // Connexion à socket.io
+  // URL locale
+  //const url = 'http://localhost:8080/play';
+  // URL Heroku
+  const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
+
+  // Connexion socket.io
   const socket = io.connect(url);
-  // Confirmation de connexion
-  socket.on('check', function(data) {
-    alert(data.message);
-    alreadyWarned = true;
-    clientNb = data.clientNb;
+
+  // On récupère le pseudo et on l'envoi au serveur
+  pseudo = prompt('Quel est votre pseudo ?');
+  // Tant que l'utilisateur n'a pas entré de pseudo
+  while(pseudo == null) {
+    pseudo = prompt('Vous devez entrer un pseudo.\nQuel est votre pseudo ?');
+  }
+  socket.emit('new_client', pseudo);
+
+  /*************************************
+  Chat textuel
+  **************************************/
+
+  // Quand un nouveau client se connecte
+  socket.on('new_client', function(pseudo) {
+    $('#zone_chat').prepend('<p><em>' + pseudo + ' a rejoint le Chat !</em></p>');
   });
 
-  socket.on('checkAll', function(message) {
-    if(!alreadyWarned) {
-      alert(message);
-    }
-    alreadyWarned = false;
-  })
+  // Quand un nouveau client se déconnecte
+  socket.on('leaving_client', function(pseudo) {
+    $('#zone_chat').prepend('<p><em>' + pseudo + ' a quitté le Chat !</em></p>');
+  });
+
+  // Quand on reçoit un message du serveur
+  socket.on('chatMessage', function(data) {
+    $('#zone_chat').prepend('<p><strong>' + data.pseudo + '</strong> ' + data.message + '</p>');
+  });
+
+  // Quand on envoie le formulaire
+  $('#formulaire_chat').submit(function () {
+    var message = $('#message').val();
+    // On envoie le message au serveur
+    socket.emit('chatMessage', message);
+    // Vide la zone de Chat et remet le focus dessus
+    $('#message').val('').focus();
+    // Permet de bloquer l'envoi "classique" du formulaire
+    return false;
+  });
 
   /*************************************
   Pour le client qui dessine
@@ -55,7 +82,7 @@ $(document).ready(function(){
     context.moveTo(x,y);
 
     // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'mousedown', client: clientNb, x: x, y: y});
+    socket.emit('drawingAction', {type: 'mousedown', pseudo: pseudo, x: x, y: y});
   })
 
   // On relâche avec la souris
@@ -64,7 +91,7 @@ $(document).ready(function(){
     drawing = false;
 
     // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'mouseup', client: clientNb});
+    socket.emit('drawingAction', {type: 'mouseup', pseudo: pseudo});
   })
 
   // On sort de la zone de dessin
@@ -73,7 +100,7 @@ $(document).ready(function(){
     drawing = false;
 
     // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'mouseout', client: clientNb});
+    socket.emit('drawingAction', {type: 'mouseout', pseudo: pseudo});
   })
 
   // On bouge la souris
@@ -90,7 +117,7 @@ $(document).ready(function(){
       context.stroke();
 
       // On envoi un message au serveur
-      socket.emit('drawingAction', {type: 'mousemove', client: clientNb, x: x, y: y});
+      socket.emit('drawingAction', {type: 'mousemove', pseudo: pseudo, x: x, y: y});
     }
   })
 
@@ -100,7 +127,7 @@ $(document).ready(function(){
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'erase', client: clientNb});
+    socket.emit('drawingAction', {type: 'erase', pseudo: pseudo});
   })
 
   $("#thinButton").click(function(){
@@ -108,7 +135,7 @@ $(document).ready(function(){
     context.lineWidth = 1;
 
     // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'thin', client: clientNb});
+    socket.emit('drawingAction', {type: 'thin', pseudo: pseudo});
   })
 
 
@@ -117,7 +144,7 @@ $(document).ready(function(){
     context.lineWidth = 10;
 
     // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'thick', client: clientNb});
+    socket.emit('drawingAction', {type: 'thick', pseudo: pseudo});
   })
 
   $("#blackButton").click(function(){
@@ -125,7 +152,7 @@ $(document).ready(function(){
     context.strokeStyle = "#000000";
 
     // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'black', client: clientNb});
+    socket.emit('drawingAction', {type: 'black', pseudo: pseudo});
   })
 
 
@@ -134,7 +161,7 @@ $(document).ready(function(){
     context.strokeStyle = "#CC0000";
 
     // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'red', client: clientNb});
+    socket.emit('drawingAction', {type: 'red', pseudo: pseudo});
   })
 
 
@@ -143,7 +170,7 @@ $(document).ready(function(){
     context.strokeStyle = "#00CC00";
 
     // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'green', client: clientNb});
+    socket.emit('drawingAction', {type: 'green', pseudo: pseudo});
   })
 
 
@@ -152,7 +179,7 @@ $(document).ready(function(){
     context.strokeStyle = "#0000CC";
 
     // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'blue', client: clientNb});
+    socket.emit('drawingAction', {type: 'blue', pseudo: pseudo});
   })
 
   /*************************************
@@ -162,7 +189,7 @@ $(document).ready(function(){
   // Lorsqu'on reçoit une action liée au dessin
   socket.on('drawingAction', function(data) {
     // Si on est pas le client qui vient de réaliser cette action
-    if(data.client != clientNb) {
+    if(data.pseudo != pseudo) {
       switch(data.type) {
         case 'mousedown':
           // Commence un nouveau chemin (avec la couleur et la largeur actuelle)
@@ -224,4 +251,4 @@ $(document).ready(function(){
       }
     }
   });
-})
+});
