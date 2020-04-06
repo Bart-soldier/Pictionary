@@ -7,7 +7,8 @@ var drawing;
 var alreadyWarned;
 
 $(document).ready(function(){
-  url = 'http://localhost:8080/play';
+  //url = 'http://localhost:8080/play';
+  url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
   canvas = document.getElementById("whiteboard");
   context = canvas.getContext("2d");
   // Largeur du trait par défaut
