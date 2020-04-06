@@ -13,7 +13,10 @@ const Play = () => {
         <div className="container">
           <center>
             <div id="conteneur">
-              <canvas id="whiteboard" width="500" height="300"></canvas>
+              <canvas id="whiteboard" width="500" height="300">
+                Your browser needs to support canvas in order to be able to play !
+              </canvas>
+
               <br/>
               <button id="eraseButton">Tout effacer</button>
               <br/><br/>
