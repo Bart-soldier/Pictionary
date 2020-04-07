@@ -4,6 +4,57 @@ var canvas;
 var context;
 var drawing;
 var pseudo;
+// URL locale
+//const url = 'http://localhost:8080/play';
+// URL Heroku
+const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
+
+// Fonction asynchrone qui se charge de demander à l'utilisateur un pseudo
+// jusqu'à ce que ce dernier soit unique et non nul
+async function getUsername(socket) {
+  // On récupère le pseudo
+  pseudo = prompt('Quel est votre pseudo ?');
+  // Booléen utilisé pour savoir si un pseudo est déjà utilisé
+  var usernameAlreadyUsed = true;
+
+  // Tant que l'utilisateur n'a pas entré de pseudo unique
+  while(usernameAlreadyUsed) {
+    // Tant que l'utilisateur n'a pas entré de pseudo non nul
+    while(pseudo == null || pseudo == '') {
+      pseudo = prompt("Vous devez entrer un pseudo.\nQuel est votre pseudo ?");
+    }
+
+    // On attend la promesse pour savoir si le pseudo est déjà utilisé
+    usernameAlreadyUsed = await isUsernameTaken(socket);
+
+    // Si le pseudo est déjà utilisé
+    if(usernameAlreadyUsed) {
+      pseudo = prompt(`Le pseudo ${pseudo} est déjà utilisé. Merci d'en choisir un autre.\nQuel est votre pseudo ?`);
+    }
+  }
+}
+
+// Promesse qui indique si le pseudo est déjà utilisé ou non en fonction de la réponse du seveur
+// Sinon, elle indique que le pseudo est déjà utilisé si aucun message n'est reçu dans les 2 secondes
+function isUsernameTaken(socket) {
+  // On envoi le pseudo au serveur
+  socket.emit('new_client', pseudo);
+
+  return new Promise(resolve => {
+    // Si on sait que le pseudo est déjà utilisé, on renvoi la promesse avec la valeur vrai
+    socket.on('username_already_used', function() {
+      resolve(true);
+    });
+    // Si on sait que le pseudo n'est pas déjà utilisé, on renvoi la promesse avec la valeur faux
+    socket.on('username_not_taken', function() {
+      resolve(false);
+    });
+    // Si le temps s'écoule, on renvoi la promesse avec la valeur vrai
+    setTimeout(() => {
+      resolve(true);
+    }, 2000);
+  })
+}
 
 $(document).ready(function(){
   // Récupération de la zone de dessin
@@ -17,21 +68,11 @@ $(document).ready(function(){
   // Booléen utilisé pour savoir si on est entrain de dessiner ou non
   drawing = false;
 
-  // URL locale
-  //const url = 'http://localhost:8080/play';
-  // URL Heroku
-  const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
-
   // Connexion socket.io
   const socket = io.connect(url);
 
   // On récupère le pseudo et on l'envoi au serveur
-  pseudo = prompt('Quel est votre pseudo ?');
-  // Tant que l'utilisateur n'a pas entré de pseudo
-  while(pseudo == null) {
-    pseudo = prompt('Vous devez entrer un pseudo.\nQuel est votre pseudo ?');
-  }
-  socket.emit('new_client', pseudo);
+  getUsername(socket);
 
   /*************************************
   Chat textuel
