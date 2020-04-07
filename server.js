@@ -133,8 +133,11 @@ var play = io
 
     // Quand on reçoit un message du chat
     socket.on('chatMessage', function(message) {
-      // On le retransmet aux autres clients connectés
-      play.emit('chatMessage', {pseudo: socket.pseudo, message: message});
+      // Si le message n'est pas vide
+      if(message != '') {
+        // On le retransmet aux autres clients connectés
+        play.emit('chatMessage', {pseudo: socket.pseudo, message: message});
+      }
     });
 
 
@@ -143,7 +146,7 @@ var play = io
       // Si le pseudo est bien dans la liste, on le supprime
       if(listePseudos.remove(socket.pseudo) != -1) {
         // On l'écrit dans le log
-        console.log(`${socket.pseudo} déconnecté !`);
+        console.log(`${socket.pseudo} déconnecté...`);
         // On envoi un message à tous les clients connectés à la page
         play.emit('leaving_client', socket.pseudo);
       }

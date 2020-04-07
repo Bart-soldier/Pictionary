@@ -79,18 +79,45 @@ $(document).ready(function(){
   **************************************/
 
   // Quand un nouveau client se connecte
-  socket.on('new_client', function(pseudo) {
-    $('#zone_chat').append('<p><em>' + pseudo + ' a rejoint le Chat !</em></p>');
+  socket.on('new_client', function(socketPseudo) {
+    if(socketPseudo == pseudo) {
+      $('#username').append('<p><em><strong>Bienvenue, ' + socketPseudo + '</strong></em></p>');
+    }
+
+    // Le message de connexion est affiché au milieu
+    $('#zone_chat').append('<p><em><strong>' + socketPseudo + '</strong> a rejoint le chat !</em></p>');
+
+    // Dirige la barre de défilement au message le plus récent
+    var chatZone = document.getElementById("zone_chat");
+    chatZone.scrollTop = chatZone.scrollHeight;
   });
 
-  // Quand un nouveau client se déconnecte
+  // Quand un client se déconnecte
   socket.on('leaving_client', function(pseudo) {
-    $('#zone_chat').append('<p><em>' + pseudo + ' a quitté le Chat !</em></p>');
+    // Le message de déconnexion est affiché au milieu
+    $('#zone_chat').append('<p><em><strong>' + pseudo + '</strong> a quitté le chat...</em></p>');
+
+    // Dirige la barre de défilement au message le plus récent
+    var chatZone = document.getElementById("zone_chat");
+    chatZone.scrollTop = chatZone.scrollHeight;
   });
 
   // Quand on reçoit un message du serveur
   socket.on('chatMessage', function(data) {
-    $('#zone_chat').append('<p><strong>' + data.pseudo + '</strong> ' + data.message + '</p>');
+    // Si nous avons envoyé le message
+    if(data.pseudo == pseudo) {
+      // Il est affiché à droite
+      $('#zone_chat').append('<section id="zone_chat_right"><p><strong>' + data.pseudo + ' :</strong> ' + data.message + '</p></section>');
+    }
+    // Sinon
+    else {
+      // Il est affiché à gauche
+      $('#zone_chat').append('<section id="zone_chat_left"><p><strong>' + data.pseudo + ' :</strong> ' + data.message + '</p></section>');
+    }
+
+    // Dirige la barre de défilement au message le plus récent
+    var chatZone = document.getElementById("chat");
+    chatZone.scrollTop = chatZone.scrollHeight;
   });
 
   // Quand on envoie le formulaire

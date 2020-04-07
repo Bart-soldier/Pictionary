@@ -109,6 +109,70 @@ canvas {
   background-color: #f1f1f1;
 }
 
+#username{
+  border: 2px solid #dedede;
+  background-color: #f1f1f1;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+#zone_chat_left {
+  border: 2px solid #dedede;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0;
+  margin-right: 25%;
+  text-align: left;
+  color: white;
+  border-color: #111;
+  background-color: #454545;
+}
+
+#zone_chat_left::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+#zone_chat_right {
+  border: 2px solid #dedede;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0;
+  margin-left: 25%;
+  text-align: right;
+  color: white;
+  border-color: #b30000;
+  background-color: #cf2323;
+}
+
+#zone_chat_right::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+#envoi_message {
+  text-align: center;
+  margin: 4px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  background-color: white;
+  color: black;
+  border: 2px solid #24478f;
+}
+
+#envoi_message:hover {
+  background-color: #24478f;
+  color: white;
+}
+
+#message {
+  padding: none 75%;
+  border: 2px solid #5e5e5e;
+}
+
 .column {
   float: left;
   padding: 10px;
