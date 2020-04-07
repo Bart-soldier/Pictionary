@@ -64,3 +64,7 @@ L'adresse de l'application est : https://clerc-dejaham-pictionary.herokuapp.com/
  - yarn start
  
  L'adresse locale est : http://localhost:8080/
+
+# Known Issues
+ - Il est possible d'avoir un pseudo composé uniquement d'espaces.
+ - Si, dans une même page play, un joueur quitte la page pendant qu'un autre joueur choisit un pseudo, le pseudo du joueur qui vient de quitter la page n'est plus disponible.
