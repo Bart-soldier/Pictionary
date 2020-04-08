@@ -67,3 +67,4 @@ L'adresse de l'application est : https://clerc-dejaham-pictionary.herokuapp.com/
 
 # Known Issues
  - Il est possible d'avoir un pseudo composé uniquement d'espaces.
+ - Il est possible d'envoyer des messages composés uniquement d'espaces.
