@@ -212,7 +212,7 @@ canvas {
   color: white;
 }
 
-#toolButton {
+#eraseButton, #thinButton, #thickButton {
   text-align: center;
   margin: 2px;
   padding: 10px;
@@ -224,7 +224,7 @@ canvas {
   border-radius: 5px;
 }
 
-#toolButton:hover {
+#eraseButton:hover, #thinButton:hover, #thickButton:hover {
   background-color: #24478f;
   color: white;
 }

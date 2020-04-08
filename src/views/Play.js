@@ -32,9 +32,9 @@ const Play = () => {
                   </canvas>
 
                   <section id="toolbox">
-                    <button id="toolButton">Tout effacer</button>
-                    <button id="toolButton">Fin</button>
-                    <button id="toolButton">Épais</button>
+                    <button id="eraseButton">Tout effacer</button>
+                    <button id="thinButton">Fin</button>
+                    <button id="thickButton">Épais</button>
                     <button id="blackButton"></button>
                     <button id="redButton"></button>
                     <button id="greenButton"></button>
