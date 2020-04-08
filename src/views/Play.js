@@ -14,31 +14,39 @@ const Play = () => {
           <center>
             <div class ="row">
               <div class="column left">
+                <section id="connectedPlayersHeader">
+                  <p><em><strong>Joueurs connectés :</strong></em></p>
+                </section>
+                <section id="connectedPlayers">
+                </section>
+
+              </div>
+
+              <div class="column middle">
                 <div id="conteneur">
+                  <section id="drawingUser">
+                  </section>
+
                   <canvas id="whiteboard" width="500" height="300">
                     Your browser needs to support canvas in order to be able to play !
                   </canvas>
 
-                  <br/>
-                  <button id="eraseButton">Tout effacer</button>
-                  <br/><br/>
-                  Largeur du trait :
-                  <button id="thinButton">Fin</button>
-                  <button id="thickButton">Épais</button>
-                  <br/><br/>
-                  Couleur du trait :
-                  <button id="blackButton">Noir</button>
-                  <button id="redButton">Rouge</button>
-                  <button id="greenButton">Vert</button>
-                  <button id="blueButton">Bleu</button>
+                  <section id="toolbox">
+                    <button id="toolButton">Tout effacer</button>
+                    <button id="toolButton">Fin</button>
+                    <button id="toolButton">Épais</button>
+                    <button id="blackButton"></button>
+                    <button id="redButton"></button>
+                    <button id="greenButton"></button>
+                    <button id="blueButton"></button>
+                  </section>
                 </div>
               </div>
 
               <div class="column right">
+                <section id="username">
+                </section>
                 <div id="chat">
-                  <section id="username">
-                  </section>
-
                   <section id="zone_chat">
                   </section>
 

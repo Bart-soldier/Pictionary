@@ -48,7 +48,7 @@ class Queue {
     return index;
   }
 
-  get firstElement() {
+  removeFirstElement() {
     // On récupère la première valeur du tableau
     returnValue = this.elements[0];
     // On parcours le tableau
@@ -61,11 +61,15 @@ class Queue {
     return returnValue;
   }
 
-  get length() {
+  get(index) {
+    return this.elements[index];
+  }
+
+  getLength() {
     return this.elements.length;
   }
 
-  set length(length) {
+  setLength(length) {
     return this.elements.length = length;
   }
 }
@@ -99,6 +103,9 @@ server.listen(port, () => console.log(`Listening on port ${port}.`));
 // On créer la queue utilisé pour le stockage des pseudos
 const listePseudos = new Queue();
 
+// Pseudo du joueur qui dessine
+var drawingUser;
+
 var play = io
   // On dédie un socket à la page play
   .of('/play')
@@ -121,17 +128,25 @@ var play = io
         socket.pseudo = pseudo;
         // On l'ajoute à la liste de pseudos
         listePseudos.push(pseudo);
+
+        // Si c'est le seul joueur sur cette page
+        if(listePseudos.getLength() == 1) {
+          drawingUser = pseudo;
+        }
+        // On envoi au message au nouveau client pour lui indiquer qui dessine
+        socket.emit('whos_drawing', drawingUser);
+
         // On l'écrit dans le log
         console.log(`${pseudo} connecté !`);
         // On envoi un message à tous les clients connectés à la page
-        play.emit('new_client', pseudo);
+        play.emit('new_client', {pseudo: pseudo, listePseudos: listePseudos});
       }
     });
 
     // Quand on reçoit une action de dessin
-    socket.on('drawingAction', function(message) {
+    socket.on('drawingAction', function(data) {
       // On le retransmet aux autres clients connectés
-      play.emit('drawingAction', message);
+      play.emit('drawingAction', data);
     });
 
     // Quand on reçoit un message du chat
@@ -151,7 +166,15 @@ var play = io
         // On l'écrit dans le log
         console.log(`${socket.pseudo} déconnecté...`);
         // On envoi un message à tous les clients connectés à la page
-        play.emit('leaving_client', socket.pseudo);
+        play.emit('leaving_client', {pseudo: socket.pseudo, listePseudos: listePseudos});
+      }
+
+      // Si c'était l'utilisateur entrain de dessiner et que ce n'était pas le seul sur la page
+      if(socket.pseudo == drawingUser && listePseudos.getLength() > 0) {
+        // On prend le prochain dans la liste
+        drawingUser = listePseudos.get(0);
+        // On le signale aux autres joueurs
+        play.emit('whos_drawing', drawingUser);
       }
     });
   });

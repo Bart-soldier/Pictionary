@@ -4,6 +4,7 @@ var canvas;
 var context;
 var drawing;
 var pseudo;
+var drawingUser;
 // URL locale
 //const url = 'http://localhost:8080/play';
 // URL Heroku
@@ -56,6 +57,18 @@ function isUsernameTaken(socket) {
   })
 }
 
+// Met à jour l'affichage à l'écran de la listes de joueurs connectés dans leur ordre de tour à dessiner
+function updateConnectedPlayers(listePseudos) {
+  // On réinitialise la liste des joueurs connectés
+  $('#connectedPlayers').replaceWith('<section id="connectedPlayers"></section>');
+
+  // On parcourt tous les pseudos
+  for(let i = 0; i < listePseudos.elements.length; i++) {
+    // On ajoute le pseudo à la liste des joueurs connectés
+    $('#connectedPlayers').append('<p><em><strong>' + listePseudos.elements[i] + '</strong></em></p>');
+  }
+}
+
 $(document).ready(function(){
   // Récupération de la zone de dessin
   canvas = document.getElementById("whiteboard");
@@ -79,13 +92,16 @@ $(document).ready(function(){
   **************************************/
 
   // Quand un nouveau client se connecte
-  socket.on('new_client', function(socketPseudo) {
-    if(socketPseudo == pseudo) {
-      $('#username').append('<p><em><strong>Bienvenue, ' + socketPseudo + '</strong></em></p>');
+  socket.on('new_client', function(data) {
+    if(data.pseudo == pseudo) {
+      $('#username').append('<p><em><strong>Bienvenue, ' + data.pseudo + '</strong></em></p>');
     }
 
+    // On met à jour la liste des joueurs connectés
+    updateConnectedPlayers(data.listePseudos);
+
     // Le message de connexion est affiché au milieu
-    $('#zone_chat').append('<p><em><strong>' + socketPseudo + '</strong> a rejoint le chat !</em></p>');
+    $('#zone_chat').append('<p><em><strong>' + data.pseudo + '</strong> a rejoint le chat !</em></p>');
 
     // Dirige la barre de défilement au message le plus récent
     var chatZone = document.getElementById("zone_chat");
@@ -93,9 +109,12 @@ $(document).ready(function(){
   });
 
   // Quand un client se déconnecte
-  socket.on('leaving_client', function(pseudo) {
+  socket.on('leaving_client', function(data) {
     // Le message de déconnexion est affiché au milieu
-    $('#zone_chat').append('<p><em><strong>' + pseudo + '</strong> a quitté le chat...</em></p>');
+    $('#zone_chat').append('<p><em><strong>' + data.pseudo + '</strong> a quitté le chat...</em></p>');
+
+    // On met à jour la liste des joueurs connectés
+    updateConnectedPlayers(data.listePseudos);
 
     // Dirige la barre de défilement au message le plus récent
     var chatZone = document.getElementById("zone_chat");
@@ -139,120 +158,172 @@ $(document).ready(function(){
 
   // On clic avec la souris
   $("#whiteboard").mousedown(function(e){
-    // On dessine
-    drawing = true;
-    // Commence un nouveau chemin (avec la couleur et la largeur actuelle)
-    context.beginPath();
+    // Si on est autorisé à dessiner
+    if(pseudo == drawingUser) {
+      // On dessine
+      drawing = true;
+      // Commence un nouveau chemin (avec la couleur et la largeur actuelle)
+      context.beginPath();
 
-    // Début du chemin au point actuel
-    var x = e.pageX - canvas.offsetLeft;
-    var y = e.pageY - canvas.offsetTop;
-    context.moveTo(x,y);
+      // Début du chemin au point actuel
+      var x = e.pageX - canvas.offsetLeft;
+      var y = e.pageY - canvas.offsetTop;
+      context.moveTo(x,y);
 
-    // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'mousedown', pseudo: pseudo, x: x, y: y});
+      // On envoi un message au serveur
+      socket.emit('drawingAction', {type: 'mousedown', pseudo: pseudo, x: x, y: y});
+    }
   })
 
   // On relâche avec la souris
   $("#whiteboard").mouseup(function(e){
-    // On arrête de dessiner
-    drawing = false;
+    // Si on est autorisé à dessiner
+    if(pseudo == drawingUser) {
+      // On arrête de dessiner
+      drawing = false;
 
-    // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'mouseup', pseudo: pseudo});
+      // On envoi un message au serveur
+      socket.emit('drawingAction', {type: 'mouseup', pseudo: pseudo});
+    }
   })
 
   // On sort de la zone de dessin
   $("#whiteboard").mouseout(function(e){
-    // On arrête de dessiner
-    drawing = false;
+    // Si on est autorisé à dessiner
+    if(pseudo == drawingUser) {
+      // On arrête de dessiner
+      drawing = false;
 
-    // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'mouseout', pseudo: pseudo});
+      // On envoi un message au serveur
+      socket.emit('drawingAction', {type: 'mouseout', pseudo: pseudo});
+    }
   })
 
   // On bouge la souris
   $("#whiteboard").mousemove(function(e){
-    // Si on est entrain de dessiner
-    if (drawing == true) {
-      // On récupère la position actuelle
-      var x = e.pageX - canvas.offsetLeft;
-      var y = e.pageY - canvas.offsetTop;
+    // Si on est autorisé à dessiner
+    if(pseudo == drawingUser) {
+      // Si on est entrain de dessiner
+      if (drawing == true) {
+        // On récupère la position actuelle
+        var x = e.pageX - canvas.offsetLeft;
+        var y = e.pageY - canvas.offsetTop;
 
-      // On dessine une ligne entre les dernières coordonnées
-      // retenues et la position actuelle
-      context.lineTo(x, y);
-      context.stroke();
+        // On dessine une ligne entre les dernières coordonnées
+        // retenues et la position actuelle
+        context.lineTo(x, y);
+        context.stroke();
 
-      // On envoi un message au serveur
-      socket.emit('drawingAction', {type: 'mousemove', pseudo: pseudo, x: x, y: y});
+        // On envoi un message au serveur
+        socket.emit('drawingAction', {type: 'mousemove', pseudo: pseudo, x: x, y: y});
+      }
     }
   })
 
   // Pour chaque boutons
 
   $("#eraseButton").click(function(){
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    // Si on est autorisé à dessiner
+    if(pseudo == drawingUser) {
+      context.clearRect(0, 0, canvas.width, canvas.height);
 
-    // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'erase', pseudo: pseudo});
+      // On envoi un message au serveur
+      socket.emit('drawingAction', {type: 'erase', pseudo: pseudo});
+    }
   })
 
   $("#thinButton").click(function(){
-    context.beginPath();
-    context.lineWidth = 1;
+    // Si on est autorisé à dessiner
+    if(pseudo == drawingUser) {
+      context.beginPath();
+      context.lineWidth = 1;
 
-    // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'thin', pseudo: pseudo});
+      // On envoi un message au serveur
+      socket.emit('drawingAction', {type: 'thin', pseudo: pseudo});
+    }
   })
 
 
   $("#thickButton").click(function(){
-    context.beginPath();
-    context.lineWidth = 10;
+    // Si on est autorisé à dessiner
+    if(pseudo == drawingUser) {
+      context.beginPath();
+      context.lineWidth = 10;
 
-    // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'thick', pseudo: pseudo});
+      // On envoi un message au serveur
+      socket.emit('drawingAction', {type: 'thick', pseudo: pseudo});
+    }
   })
 
   $("#blackButton").click(function(){
-    context.beginPath();
-    context.strokeStyle = "#000000";
+    // Si on est autorisé à dessiner
+    if(pseudo == drawingUser) {
+      context.beginPath();
+      context.strokeStyle = "#000000";
 
-    // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'black', pseudo: pseudo});
+      // On envoi un message au serveur
+      socket.emit('drawingAction', {type: 'black', pseudo: pseudo});
+    }
   })
 
 
   $("#redButton").click(function(){
-    context.beginPath();
-    context.strokeStyle = "#CC0000";
+    // Si on est autorisé à dessiner
+    if(pseudo == drawingUser) {
+      context.beginPath();
+      context.strokeStyle = "#CC0000";
 
-    // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'red', pseudo: pseudo});
+      // On envoi un message au serveur
+      socket.emit('drawingAction', {type: 'red', pseudo: pseudo});
+    }
   })
 
 
   $("#greenButton").click(function(){
-    context.beginPath();
-    context.strokeStyle = "#00CC00";
+    // Si on est autorisé à dessiner
+    if(pseudo == drawingUser) {
+      context.beginPath();
+      context.strokeStyle = "#00CC00";
 
-    // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'green', pseudo: pseudo});
+      // On envoi un message au serveur
+      socket.emit('drawingAction', {type: 'green', pseudo: pseudo});
+    }
   })
 
 
   $("#blueButton").click(function(){
-    context.beginPath();
-    context.strokeStyle = "#0000CC";
+    // Si on est autorisé à dessiner
+    if(pseudo == drawingUser) {
+      context.beginPath();
+      context.strokeStyle = "#0000CC";
 
-    // On envoi un message au serveur
-    socket.emit('drawingAction', {type: 'blue', pseudo: pseudo});
+      // On envoi un message au serveur
+      socket.emit('drawingAction', {type: 'blue', pseudo: pseudo});
+    }
   })
 
   /*************************************
   Pour les autres clients
   **************************************/
+
+  // Quand on indique qui dessine
+  socket.on('whos_drawing', function(username) {
+    drawingUser = username;
+
+    // Si on est l'utilisateur qui dessine
+    if(pseudo == username) {
+      // On affiche la boîte à outil
+      document.getElementById("toolbox").style.display = 'block';
+    }
+    // Sinon
+    else {
+      // On cache la boîte à outil
+      document.getElementById("toolbox").style.display = 'none';
+    }
+
+    // On l'écrit sur la page
+    $('#drawingUser').replaceWith('<section id="drawingUser"><p><em><strong>' + username + ' est en train de dessiner...</strong></em></p></section>');
+  });
 
   // Lorsqu'on reçoit une action liée au dessin
   socket.on('drawingAction', function(data) {
@@ -266,16 +337,6 @@ $(document).ready(function(){
           // Début du chemin au point actuel
           context.moveTo(data.x, data.y);
           break;
-
-        /*case 'mouseup':
-          // On arrête de dessiner
-          drawing = false;
-          break;
-
-        case 'mouseout':
-          // On arrête de dessiner
-          drawing = false;
-          break;*/
 
         case 'mousemove':
           // On dessine une ligne entre les dernières coordonnées

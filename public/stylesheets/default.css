@@ -6,6 +6,7 @@ body {
   sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: #e8e8e8;
 }
 
 code {
@@ -90,7 +91,9 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif}
 .fa-anchor,.fa-coffee {font-size:200px}
 
 canvas {
-       border: 1px dashed black;
+  border: 2px solid #b5b5b5;
+  background-color: #f1f1f1;
+  border-radius: 5px;
 }
 
 #conteneur{
@@ -99,18 +102,57 @@ canvas {
   margin-right:auto;
 }
 
+#drawingUser{
+  border: 2px solid #b5b5b5;
+  background-color: #f1f1f1;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+#toolbox{
+  display: none;
+  border: 2px solid #b5b5b5;
+  background-color: #f1f1f1;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+#connectedPlayersHeader{
+  border: 2px solid #b5b5b5;
+  background-color: #f1f1f1;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+#connectedPlayers{
+  height:500px;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow: auto;
+  border: 2px solid #b5b5b5;
+  background-color: #f1f1f1;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0;
+}
+
 #chat{
   height:500px;
   white-space: normal;
   word-wrap: break-word;
   overflow: auto;
-  border-left:1em solid transparent;
-  border-right:1em solid transparent;
+  border: 2px solid #b5b5b5;
   background-color: #f1f1f1;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0;
 }
 
 #username{
-  border: 2px solid #dedede;
+  border: 2px solid #b5b5b5;
   background-color: #f1f1f1;
   border-radius: 5px;
   padding: 10px;
@@ -118,7 +160,7 @@ canvas {
 }
 
 #zone_chat_left {
-  border: 2px solid #dedede;
+  border: 2px solid #b5b5b5;
   border-radius: 5px;
   padding: 10px;
   margin: 10px 0;
@@ -136,7 +178,7 @@ canvas {
 }
 
 #zone_chat_right {
-  border: 2px solid #dedede;
+  border: 2px solid #b5b5b5;
   border-radius: 5px;
   padding: 10px;
   margin: 10px 0;
@@ -155,12 +197,14 @@ canvas {
 
 #envoi_message {
   text-align: center;
-  margin: 4px;
+  margin: 10px;
+  padding: 10px;
   transition-duration: 0.4s;
   cursor: pointer;
-  background-color: white;
+  background-color: #f1f1f1;
   color: black;
   border: 2px solid #24478f;
+  border-radius: 5px;
 }
 
 #envoi_message:hover {
@@ -168,9 +212,97 @@ canvas {
   color: white;
 }
 
+#toolButton {
+  text-align: center;
+  margin: 2px;
+  padding: 10px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  background-color: #f1f1f1;
+  color: black;
+  border: 2px solid #24478f;
+  border-radius: 5px;
+}
+
+#toolButton:hover {
+  background-color: #24478f;
+  color: white;
+}
+
+#blackButton {
+  text-align: center;
+  margin: 2px;
+  padding: 10px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  background-color: black;
+  color: white;
+  border: 2px solid black;
+  border-radius: 5px;
+}
+
+#blackButton:hover {
+  background-color: #f1f1f1;
+  color: black;
+}
+
+#redButton {
+  text-align: center;
+  margin: 2px;
+  padding: 10px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  background-color: red;
+  color: white;
+  border: 2px solid red;
+  border-radius: 5px;
+}
+
+#redButton:hover {
+  background-color: #f1f1f1;
+  color: black;
+}
+
+#greenButton {
+  text-align: center;
+  margin: 2px;
+  padding: 10px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  background-color: green;
+  color: white;
+  border: 2px solid green;
+  border-radius: 5px;
+}
+
+#greenButton:hover {
+  background-color: #f1f1f1;
+  color: black;
+}
+
+#blueButton {
+  text-align: center;
+  margin: 2px;
+  padding: 10px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  background-color: blue;
+  color: white;
+  border: 2px solid blue;
+  border-radius: 5px;
+}
+
+#blueButton:hover {
+  background-color: #f1f1f1;
+  color: black;
+}
+
 #message {
-  padding: none 75%;
-  border: 2px solid #5e5e5e;
+  border: 2px solid #b5b5b5;
+  background-color: #f1f1f1;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0;
 }
 
 .column {
@@ -178,12 +310,12 @@ canvas {
   padding: 10px;
 }
 
-.left {
-  width:66.66%;
+.middle {
+  width:50%;
 }
 
-.right {
-  width:33.33%;
+.left, .right {
+  width:25%;
 }
 
 /* Clear floats after the columns */
