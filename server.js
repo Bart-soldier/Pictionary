@@ -42,6 +42,9 @@ class Queue {
       this.elements[i] = this.elements[i + 1];
     }
 
+    // On supprime le dernier élément de la liste
+    this.elements.pop();
+
     return index;
   }
 
