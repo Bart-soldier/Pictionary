@@ -262,6 +262,9 @@ var play = io
       // S'il n'y a plus personne sur le page
       if(listePseudos.getLength() == 0) {
         drawingUser = null;
+        // On arrête le compte à rebours
+        clearTimeout(timeout);
+        clearInterval(timeLeftCounter);
       }
     });
   });

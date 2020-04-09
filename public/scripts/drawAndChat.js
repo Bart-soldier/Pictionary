@@ -9,9 +9,9 @@ var nextDrawingUser;
 var drawingWords = [null, null, null];
 
 // URL locale
-//const url = 'http://localhost:8080/play';
+const url = 'http://localhost:8080/play';
 // URL Heroku
-const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
+//const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
 
 // Fonction asynchrone qui se charge de demander à l'utilisateur un pseudo
 // jusqu'à ce que ce dernier soit unique et non nul
@@ -109,12 +109,19 @@ $(document).ready(function(){
     // Le message de déconnexion est affiché au milieu
     $('#zone_chat').append('<p><em><strong>' + data.pseudo + '</strong> a quitté le chat...</em></p>');
 
+    // Si le joueur qui vient de quitter était celui qui dessinait ou qui allait dessiner
+    if(data.pseudo == nextDrawingUser) {
+      // On réinitialize le compte à rebours
+      $('#countdown').replaceWith('<section id="countdown"></section>');
+    }
+
     // On met à jour la liste des joueurs connectés
     updateConnectedPlayers(data.listePseudos);
 
     // S'il n'y a plus personne sur la page
     if(data.listePseudos.elements.length == 0) {
       drawingUser = null;
+      nextDrawingUser = null;
     }
 
     // Dirige la barre de défilement au message le plus récent
@@ -342,8 +349,8 @@ $(document).ready(function(){
     // On cache la boîte à outil
     document.getElementById("toolbox").style.display = 'none';
 
-    // Si un utilisateur dessine
-    if(drawingUser != null) {
+    // Si un utilisateur dessine ou va dessiner
+    if(nextDrawingUser != null) {
       // On écrit sur la page qui dessine
       $('#drawingUser').replaceWith('<section id="drawingUser"><p><em><strong>' + data.drawingUser + ' est en train de dessiner...</strong></em></p></section>');
     }
