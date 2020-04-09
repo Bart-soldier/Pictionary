@@ -9,9 +9,9 @@ var nextDrawingUser;
 var drawingWords = [null, null, null];
 
 // URL locale
-const url = 'http://localhost:8080/play';
+//const url = 'http://localhost:8080/play';
 // URL Heroku
-//const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
+const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
 
 // Fonction asynchrone qui se charge de demander à l'utilisateur un pseudo
 // jusqu'à ce que ce dernier soit unique et non nul
