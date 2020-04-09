@@ -115,8 +115,17 @@ var drawingWords = [null, null, null];
 // Le mot choisit par le dessinateur
 var word;
 
+// Le compte à rebours
+var timeout;
+var timeLeft;
+var timeLeftCounter;
+
 // L'ordre de passage en tant que dessinateur est une boucle
-function newRound(play) {
+function newRound() {
+  // On arrête le compte à rebours
+  clearTimeout(timeout);
+  clearInterval(timeLeftCounter);
+
   // On réinitialise le mot à trouver
   word = null;
 
@@ -132,6 +141,16 @@ function newRound(play) {
 
   // On envoi au message au nouveau client pour lui indiquer qui dessine
   play.emit('new_round', {username: drawingUser, listePseudos: listePseudos, firstWord: drawingWords[0], secondWord: drawingWords[1], thirdWord: drawingWords[2]});
+}
+
+function countdown() {
+  play.emit('word_not_found', word);
+  newRound();
+}
+
+function displayCountdown() {
+  play.emit('update_countdown', timeLeft);
+  timeLeft--;
 }
 
 var play = io
@@ -179,11 +198,18 @@ var play = io
         case "third":
           word = drawingWords[2];
       }
+
+      // On lance le compte à rebours de 60 secondes
+      timeout = setTimeout(countdown, 61000);
+
+      // On lance l'affichage du compte à rebours
+      timeLeft = 60;
+      timeLeftCounter = setInterval(displayCountdown, 1000);
     });
 
     // Quand l'hôte lance la partie
     socket.on('launch_game', function() {
-      newRound(play);
+      newRound();
     });
 
     // Quand on reçoit une action de dessin
@@ -206,7 +232,7 @@ var play = io
         play.emit('word_found', {word: word, pseudo: socket.pseudo})
 
         // On lance un nouveau round
-        newRound(play);
+        newRound();
       }
     });
 
@@ -224,7 +250,7 @@ var play = io
         if(listePseudos.getLength() > 0) {
           // Si c'était l'utilisateur qui était en train de dessiner
           if(socket.pseudo == drawingUser) {
-            newRound(play);
+            newRound();
           }
           // Si personne ne dessinait et que c'était l'utilisteur qui devait lancer la partie
           if(drawingUser == null) {

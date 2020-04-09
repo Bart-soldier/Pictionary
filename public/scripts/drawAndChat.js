@@ -9,9 +9,9 @@ var nextDrawingUser;
 var drawingWords = [null, null, null];
 
 // URL locale
-const url = 'http://localhost:8080/play';
+//const url = 'http://localhost:8080/play';
 // URL Heroku
-//const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
+const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
 
 // Fonction asynchrone qui se charge de demander à l'utilisateur un pseudo
 // jusqu'à ce que ce dernier soit unique et non nul
@@ -126,6 +126,30 @@ $(document).ready(function(){
   socket.on('word_found', function(data) {
     // Le message est affiché au milieu
     $('#zone_chat').append('<font color="green"><p><em><strong>' + data.pseudo + '</strong> a trouvé le mot : <strong>' + data.word + '</strong></em></p></font>');
+    // On réinitialize le compte à rebours
+    $('#countdown').replaceWith('<section id="countdown"></section>');
+  });
+
+  // Quand le mot n'a pas été trouvé
+  socket.on('word_not_found', function(word) {
+    // Le message est affiché au milieu
+    $('#zone_chat').append(`<font color="red"><p><em>Personne n'a trouvé le mot : <strong>` + word + '</strong></em></p></font>');
+    // On réinitialize le compte à rebours
+    $('#countdown').replaceWith('<section id="countdown"></section>');
+  })
+
+  // Quand on met-à-jour le compte à rebours visible à l'écran
+  socket.on('update_countdown', function(timeLeft) {
+    // Si on est en train de dessiner
+    if(pseudo == drawingUser) {
+      // On affiche le temps restant pour faire deviner le mot
+      $('#countdown').replaceWith('<section id="countdown"><p><em>Il vous reste <strong>' + timeLeft + ' secondes pour faire deviner le mot</strong></em></section>');
+    }
+    // Sinon
+    else {
+      // On affiche le temps restant avant de trouver le mot
+      $('#countdown').replaceWith('<section id="countdown"><p><em>Il vous reste <strong>' + timeLeft + ' secondes pour trouver le mot</strong></em></section>');
+    }
   });
 
   // Quand on reçoit un message du serveur

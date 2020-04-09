@@ -26,6 +26,7 @@ const Play = () => {
                 <div id="conteneur">
                   <section id="canvasHeader">
                     <section id="drawingUser"></section>
+                    <section id="countdown"></section>
                     <button id="launchGame">Clique ici pour lancer la partie</button>
                   </section>
 
