@@ -11,8 +11,8 @@ const home = () => {
         </div>
 
         <div className="container">
-          <div className="alert alert-info text-center" role="alert">
-            To see our code, head to the <a href="https://github.com/Bart-soldier/Pictionary" className="alert-link">Pictionary</a> repository.
+          <div id="greyBox" role="alert">
+            To see our code, head to the <a href="https://github.com/Bart-soldier/Pictionary"><strong>Pictionary</strong></a> repository.
           </div>
           <hr/>
 

@@ -5,10 +5,13 @@ var context;
 var drawing;
 var pseudo;
 var drawingUser;
+var nextDrawingUser;
+var drawingWords = [null, null, null];
+
 // URL locale
-//const url = 'http://localhost:8080/play';
+const url = 'http://localhost:8080/play';
 // URL Heroku
-const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
+//const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
 
 // Fonction asynchrone qui se charge de demander à l'utilisateur un pseudo
 // jusqu'à ce que ce dernier soit unique et non nul
@@ -65,7 +68,7 @@ function updateConnectedPlayers(listePseudos) {
   // On parcourt tous les pseudos
   for(let i = 0; i < listePseudos.elements.length; i++) {
     // On ajoute le pseudo à la liste des joueurs connectés
-    $('#connectedPlayers').append('<p><em><strong>' + listePseudos.elements[i] + '</strong></em></p>');
+    $('#connectedPlayers').append('<p><em><strong>' + listePseudos.elements[i] + '</strong></em></p><hr/>');
   }
 }
 
@@ -73,13 +76,6 @@ $(document).ready(function(){
   // Récupération de la zone de dessin
   canvas = document.getElementById("whiteboard");
   context = canvas.getContext("2d");
-  // Largeur du trait par défaut
-  context.lineWidth = 1;
-  // Couleur par défaut
-  context.strokeStyle = "#000000";
-
-  // Booléen utilisé pour savoir si on est entrain de dessiner ou non
-  drawing = false;
 
   // Connexion socket.io
   const socket = io.connect(url);
@@ -116,9 +112,20 @@ $(document).ready(function(){
     // On met à jour la liste des joueurs connectés
     updateConnectedPlayers(data.listePseudos);
 
+    // S'il n'y a plus personne sur la page
+    if(data.listePseudos.elements.length == 0) {
+      drawingUser = null;
+    }
+
     // Dirige la barre de défilement au message le plus récent
     var chatZone = document.getElementById("zone_chat");
     chatZone.scrollTop = chatZone.scrollHeight;
+  });
+
+  // Quand le mot a été trouvé
+  socket.on('word_found', function(data) {
+    // Le message est affiché au milieu
+    $('#zone_chat').append('<font color="green"><p><em><strong>' + data.pseudo + '</strong> a trouvé le mot : <strong>' + data.word + '</strong></em></p></font>');
   });
 
   // Quand on reçoit un message du serveur
@@ -307,22 +314,139 @@ $(document).ready(function(){
   **************************************/
 
   // Quand on indique qui dessine
-  socket.on('whos_drawing', function(username) {
-    drawingUser = username;
+  socket.on('whos_drawing', function(data) {
+    // On cache la boîte à outil
+    document.getElementById("toolbox").style.display = 'none';
 
-    // Si on est l'utilisateur qui dessine
-    if(pseudo == username) {
+    // Si un utilisateur dessine
+    if(drawingUser != null) {
+      // On écrit sur la page qui dessine
+      $('#drawingUser').replaceWith('<section id="drawingUser"><p><em><strong>' + data.drawingUser + ' est en train de dessiner...</strong></em></p></section>');
+    }
+
+    // Si aucun utilisateur ne dessine
+    else {
+      // Si on est l'hôte
+      if(data.listePseudos.elements[0] == pseudo) {
+        $('#drawingUser').replaceWith('<section id="drawingUser"></section>');
+        document.getElementById("launchGame").style.display = 'block';
+      }
+      // Sinon
+      else {
+        // On écrit sur la page qui est l'hôte
+        $('#drawingUser').replaceWith(`<section id="drawingUser"><p><em><strong>C'est à ` + data.listePseudos.elements[0] + ' de décider quand commencer la partie.</strong></em></p></section>');
+      }
+    }
+  });
+
+  $("#launchGame").click(function() {
+    // On cache le bouton
+    document.getElementById("launchGame").style.display = 'none';
+    // On lance la partie
+    socket.emit('launch_game');
+  });
+
+  // Quand on indique qui dessine
+  socket.on('new_round', function(data) {
+    // Largeur du trait par défaut
+    context.lineWidth = 1;
+    // Couleur par défaut
+    context.strokeStyle = "#000000";
+
+    // Booléen utilisé pour savoir si on est entrain de dessiner ou non
+    drawing = false;
+    drawingUser = null;
+
+    drawingWords[0] = data.firstWord;
+    drawingWords[1] = data.secondWord;
+    drawingWords[2] = data.thirdWord;
+
+    nextDrawingUser = data.username;
+
+    // On met à jour la liste des joueurs connectés
+    updateConnectedPlayers(data.listePseudos);
+
+    // On efface la toile en début de manche
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Si on est l'utilisateur va dessiner
+    if(pseudo == data.username) {
+
       // On affiche la boîte à outil
       document.getElementById("toolbox").style.display = 'block';
+
+      // On affiche le choix de mots
+      document.getElementById("wordsToChoose").style.display = 'block';
+
+      // On affiche les mots dans le choix des mots
+      $("#firstWord").replaceWith('<p id="firstWord">' + data.firstWord + '</p>');
+      $("#secondWord").replaceWith('<p id="secondWord">' + data.secondWord + '</p>');
+      $("#thirdWord").replaceWith('<p id="thirdWord">' + data.thirdWord + '</p>');
+
+      // On lui indique qu'il doit choisir un mot
+      context.font = "30px Arial";
+      context.fillText("Vous devez choisir un mot à faire",25,125);
+      context.fillText("deviner dans la liste ci-dessous.",35,175);
     }
     // Sinon
     else {
       // On cache la boîte à outil
       document.getElementById("toolbox").style.display = 'none';
-    }
+      }
 
     // On l'écrit sur la page
-    $('#drawingUser').replaceWith('<section id="drawingUser"><p><em><strong>' + username + ' est en train de dessiner...</strong></em></p></section>');
+    $('#drawingUser').replaceWith('<section id="drawingUser"><p><em><strong>' + data.username + ' est en train de dessiner...</strong></em></p></section>');
+  });
+
+  $("#firstWordButton").click(function() {
+    // On cache le choix des mots
+    document.getElementById("wordsToChoose").style.display = 'none';
+
+    // On supprime l'indication
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    // On identifie le nextDrawingUser comme le drawingUser (il est maintenant autorisé à dessiner)
+    drawingUser = nextDrawingUser;
+
+    // On rappelle le mot qu'il doit faire deviner
+    $('#drawingUser').append('<p><em>Vous devez faire deviner le mot <strong>' + drawingWords[0] + '</strong></em></p>');
+
+    // On indique au serveur que le premier mot de la liste a été choisit
+    socket.emit('word', "first");
+  });
+
+  $("#secondWordButton").click(function(){
+    // On cache le choix des mots
+    document.getElementById("wordsToChoose").style.display = 'none';
+
+    // On supprime l'indication
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    // On identifie le nextDrawingUser comme le drawingUser (il est maintenant autorisé à dessiner)
+    drawingUser = nextDrawingUser;
+
+    // On rappelle le mot qu'il doit faire deviner
+    $('#drawingUser').append('<p><em>Vous devez faire deviner le mot <strong>' + drawingWords[1] + '</strong></em></p>');
+
+    // On indique au serveur que le deuxième mot de la liste a été choisit
+    socket.emit('word', "second");
+  });
+
+  $("#thirdWordButton").click(function(){
+    // On cache le choix des mots
+    document.getElementById("wordsToChoose").style.display = 'none';
+
+    // On supprime l'indication
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    // On identifie le nextDrawingUser comme le drawingUser (il est maintenant autorisé à dessiner)
+    drawingUser = nextDrawingUser;
+
+    // On rappelle le mot qu'il doit faire deviner
+    $('#drawingUser').append('<p><em>Vous devez faire deviner le mot <strong>' + drawingWords[2] + '</strong></em></p>');
+
+    // On indique au serveur que le troisième mot de la liste a été choisit
+    socket.emit('word', "third");
   });
 
   // Lorsqu'on reçoit une action liée au dessin

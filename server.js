@@ -50,12 +50,15 @@ class Queue {
 
   removeFirstElement() {
     // On récupère la première valeur du tableau
-    returnValue = this.elements[0];
+    let returnValue = this.elements[0];
     // On parcours le tableau
     for(let i = 0; i < this.elements.length - 1; i++) {
       // On échange les valeurs afin d'avoir tous les éléments décalés d'une case vers la gauche
       this.elements[i] = this.elements[i + 1];
     }
+
+    // On met à jour la longueur du tableau
+    this.elements.length--;
 
     // On retourne la première valeur du tableau
     return returnValue;
@@ -104,7 +107,32 @@ server.listen(port, () => console.log(`Listening on port ${port}.`));
 const listePseudos = new Queue();
 
 // Pseudo du joueur qui dessine
-var drawingUser;
+var drawingUser = null;
+
+// Différents choix de mots à dessiner
+var drawingWords = [null, null, null];
+
+// Le mot choisit par le dessinateur
+var word;
+
+// L'ordre de passage en tant que dessinateur est une boucle
+function newRound(play) {
+  // On réinitialise le mot à trouver
+  word = null;
+
+  // On prend le premier pseudo de la liste
+  drawingUser = listePseudos.removeFirstElement();
+  // On le rajoute à la fin
+  listePseudos.push(drawingUser);
+
+  // On initialize les 3 choix possibles de mots à deviner
+  drawingWords[0] = "word1";
+  drawingWords[1] = "word2";
+  drawingWords[2] = "word3";
+
+  // On envoi au message au nouveau client pour lui indiquer qui dessine
+  play.emit('new_round', {username: drawingUser, listePseudos: listePseudos, firstWord: drawingWords[0], secondWord: drawingWords[1], thirdWord: drawingWords[2]});
+}
 
 var play = io
   // On dédie un socket à la page play
@@ -129,18 +157,33 @@ var play = io
         // On l'ajoute à la liste de pseudos
         listePseudos.push(pseudo);
 
-        // Si c'est le seul joueur sur cette page
-        if(listePseudos.getLength() == 1) {
-          drawingUser = pseudo;
-        }
         // On envoi au message au nouveau client pour lui indiquer qui dessine
-        socket.emit('whos_drawing', drawingUser);
+        socket.emit('whos_drawing', {drawingUser: drawingUser, listePseudos: listePseudos});
 
         // On l'écrit dans le log
         console.log(`${pseudo} connecté !`);
         // On envoi un message à tous les clients connectés à la page
         play.emit('new_client', {pseudo: pseudo, listePseudos: listePseudos});
       }
+    });
+
+    // Quand on reçoit le mot choisit par le dessinateur
+    socket.on('word', function(chosenWord) {
+      switch(chosenWord) {
+        case "first":
+          word = drawingWords[0];
+          break;
+        case "second":
+          word = drawingWords[1];
+          break;
+        case "third":
+          word = drawingWords[2];
+      }
+    });
+
+    // Quand l'hôte lance la partie
+    socket.on('launch_game', function() {
+      newRound(play);
     });
 
     // Quand on reçoit une action de dessin
@@ -156,6 +199,15 @@ var play = io
         // On le retransmet aux autres clients connectés
         play.emit('chatMessage', {pseudo: socket.pseudo, message: message});
       }
+
+      // Si le message correspond au mot choisit par le dessinateur et que ce n'est pas le dessinateur qui l'a écrit
+      if(message == word && drawingUser != socket.pseudo) {
+        // On indique au chat que le mot a été trouvé
+        play.emit('word_found', {word: word, pseudo: socket.pseudo})
+
+        // On lance un nouveau round
+        newRound(play);
+      }
     });
 
 
@@ -167,49 +219,23 @@ var play = io
         console.log(`${socket.pseudo} déconnecté...`);
         // On envoi un message à tous les clients connectés à la page
         play.emit('leaving_client', {pseudo: socket.pseudo, listePseudos: listePseudos});
+
+        // S'il reste quelqu'un sur la page
+        if(listePseudos.getLength() > 0) {
+          // Si c'était l'utilisateur qui était en train de dessiner
+          if(socket.pseudo == drawingUser) {
+            newRound(play);
+          }
+          // Si personne ne dessinait et que c'était l'utilisteur qui devait lancer la partie
+          if(drawingUser == null) {
+            play.emit('whos_drawing', {drawingUser: drawingUser, listePseudos: listePseudos});
+          }
+        }
       }
 
-      // Si c'était l'utilisateur entrain de dessiner et que ce n'était pas le seul sur la page
-      if(socket.pseudo == drawingUser && listePseudos.getLength() > 0) {
-        // On prend le prochain dans la liste
-        drawingUser = listePseudos.get(0);
-        // On le signale aux autres joueurs
-        play.emit('whos_drawing', drawingUser);
+      // S'il n'y a plus personne sur le page
+      if(listePseudos.getLength() == 0) {
+        drawingUser = null;
       }
     });
   });
-
-/*
-io.on('connection', function (socket) {
-  console.log('Un client est connecté !');
-  socket.emit('message', 'Vous êtes bien connecté !');
-});
-
-// Quand le serveur reçoit un message
-io.on('message', function (message) {
-  console.log('CHECK : ' + message);
-})*/
-
-/*
-let server = http.createServer((req, res) => {
-  console.log(req.url);
-  let url = url_parser.parse(req.url, true);
-
-  if(url.pathname == '/') {
-    //res.writeHead(200, {'content-type': 'text/html'});
-    //res.end(`salut <span style="color:red">toi</span>`);
-    let path = "./public/index.html";
-    if(fs.existsSync(path)) {
-      let contents = fs.readFileSync(path);
-    }
-    else {
-      // pas trouvé
-    }
-  }
-
-  else {
-    res.writeHead(404);res.end("not found");
-  }
-});
-
-server.listen(port, () => console.log(`http server on port ${port}!`));*/

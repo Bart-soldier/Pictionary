@@ -24,12 +24,20 @@ const Play = () => {
 
               <div class="column middle">
                 <div id="conteneur">
-                  <section id="drawingUser">
+                  <section id="canvasHeader">
+                    <section id="drawingUser"></section>
+                    <button id="launchGame">Clique ici pour lancer la partie</button>
                   </section>
 
                   <canvas id="whiteboard" width="500" height="300">
                     Your browser needs to support canvas in order to be able to play !
                   </canvas>
+
+                  <section id="wordsToChoose">
+                    <button id="firstWordButton"><p id="firstWord"></p></button>
+                    <button id="secondWordButton"><p id="secondWord"></p></button>
+                    <button id="thirdWordButton"><p id="thirdWord"></p></button>
+                  </section>
 
                   <section id="toolbox">
                     <button id="eraseButton">Tout effacer</button>
