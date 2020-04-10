@@ -1,6 +1,10 @@
-//server.js
+/***************************************
+* CLERC Billy & de JAHAM Charles
+*
+* server.js
+***************************************/
 
-// Structure de queue utilisée pour la liste des pseudos.
+// Structure de liste en queue utilisée pour la liste de nom d'utilisateurs
 class Queue {
   constructor(...elements) {
     this.elements = [...elements];
@@ -8,10 +12,6 @@ class Queue {
 
   push(...args) {
     return this.elements.push(...args);
-  }
-
-  shift(...args) {
-    return this.elements.shift(...args);
   }
 
   has(element) {
@@ -90,8 +90,8 @@ const io = require('socket.io')(server);
 // Permet de bloquer les caractères HTML (sécurité équivalente à htmlentities en PHP)
 const ent = require('ent');
 
-// On travaille sur l'application
-// the __dirname is the current directory from where the script is running
+// Travail sur l'application
+// Le __dirname est le dossier depuis lequel le script est executé
 app.use(favicon(__dirname + '/build/favicon.ico'));
 app.use(express.static(__dirname));
 app.use(express.static(path.join(__dirname, 'build')));
@@ -103,103 +103,117 @@ app.get('/*', function (req, res) {
 // On créer un serveur avec l'application
 server.listen(port, () => console.log(`Listening on port ${port}.`));
 
-// On créer la queue utilisé pour le stockage des pseudos
-const listePseudos = new Queue();
+/***************************************
+* Déclaration de variables globales
+***************************************/
 
-// Pseudo du joueur qui dessine
+// La queue utilisée pour le stockage des noms d'utilistaur
+const usernameList = new Queue();
+// Le nom d'utilisateur du joueur qui est choisit pour dessiner
 var drawingUser = null;
-
-// Différents choix de mots à dessiner
-var drawingWords = [null, null, null];
-
+// La liste des choix de mots à deviner
+var wordsToGuess = [null, null, null];
 // Le mot choisit par le dessinateur
-var word;
+var word = null;
+// Les variables liés au compte à rebours
+var timeout; // Pour le timeout
+var timeLeft; // L'indicateur de temps restant sur l'interval
+var timeLeftCounter; // Pour l'interval
 
-// Le compte à rebours
-var timeout;
-var timeLeft;
-var timeLeftCounter;
+/***************************************
+* Déclaration de fonctions
+***************************************/
 
-// L'ordre de passage en tant que dessinateur est une boucle
+// Fonction qui initialise une nouvelle manche
+// L'ordre de passage en tant que dessinateur est une boucle FIFO
 function newRound() {
   // On arrête le compte à rebours
   clearTimeout(timeout);
   clearInterval(timeLeftCounter);
 
-  // On réinitialise le mot à trouver
+  // Réinitialisation des variables
   word = null;
 
-  // On prend le premier pseudo de la liste
-  drawingUser = listePseudos.removeFirstElement();
-  // On le rajoute à la fin
-  listePseudos.push(drawingUser);
+  // Le dessinateur de cette manche est le premier nom d'utilisateur de la liste
+  drawingUser = usernameList.removeFirstElement();
+  // On le rajoute à la fin (boucle FIFO)
+  usernameList.push(drawingUser);
 
   // On initialize les 3 choix possibles de mots à deviner
-  drawingWords[0] = "word1";
-  drawingWords[1] = "word2";
-  drawingWords[2] = "word3";
+  wordsToGuess[0] = "word1";
+  wordsToGuess[1] = "word2";
+  wordsToGuess[2] = "word3";
 
-  // On envoi au message au nouveau client pour lui indiquer qui dessine
-  play.emit('new_round', {username: drawingUser, listePseudos: listePseudos, firstWord: drawingWords[0], secondWord: drawingWords[1], thirdWord: drawingWords[2]});
+  // On envoi au message à tous les joueurs connectés pour lancer une nouvelle manche
+  play.emit('new_round', {drawingUser: drawingUser, usernameList: usernameList, firstWord: wordsToGuess[0], secondWord: wordsToGuess[1], thirdWord: wordsToGuess[2]});
 }
 
+// Fonction qui sera executé à la fin du compte à rebours
+// Cette dernière indique aux joueurs que le mot n'a pas été trouvé et lance une nouvelle manche
 function countdown() {
   play.emit('word_not_found', word);
   newRound();
 }
 
+// Fonction qui sera executé par l'intervalle du compte à rebours (une seconde)
+// Cette dernière affiche le temps restant au compte à rebours
 function displayCountdown() {
   play.emit('update_countdown', timeLeft);
   timeLeft--;
 }
 
+/***************************************
+* Interaction client - serveur
+***************************************/
+
+// play permet d'envoyer un message à tous les joueurs connectés à la page de jeu
 var play = io
   // On dédie un socket à la page play
   .of('/play')
 
   // Quand un client se connecte
-  .on('connection', function (socket, pseudo) {
-    // Si c'est un nouveau client
-    socket.on('new_client', function(pseudo) {
-      // Si le pseudo est déjà utilisé
-      if(listePseudos.has(pseudo) != -1) {
+  .on('connection', function (socket, username) {
+
+    // Quand c'est un nouveau client
+    socket.on('new_client', function(username) {
+      // Si le nom d'utilisateur est déjà utilisé
+      if(usernameList.has(username) != -1) {
+        // On l'indique au client
         socket.emit('username_already_used');
       }
 
-      // Sinon
+      // Si le nom d'utilisateur n'est pas déjà utilisé
       else {
-        // On indique que le pseudo n'est pas déjà utilisé
+        // On indique que le nom d'utilisateur est libre
         socket.emit('username_not_taken');
-        // On encode le pseudo par sécurité
-        pseudo = ent.encode(pseudo);
-        socket.pseudo = pseudo;
-        // On l'ajoute à la liste de pseudos
-        listePseudos.push(pseudo);
+        // On encode le nom d'utilisateur par sécurité
+        username = ent.encode(username);
+        socket.username = username;
+        // On l'ajoute à la liste de nom d'utilisateur
+        usernameList.push(username);
 
         // On envoi au message au nouveau client pour lui indiquer qui dessine
-        socket.emit('whos_drawing', {drawingUser: drawingUser, listePseudos: listePseudos});
+        socket.emit('whos_drawing', {drawingUser: drawingUser, usernameList: usernameList});
 
         // On l'écrit dans le log
-        console.log(`${pseudo} connecté !`);
-        // On envoi un message à tous les clients connectés à la page
-        play.emit('new_client', {pseudo: pseudo, listePseudos: listePseudos});
+        console.log(`${username} connecté !`);
+        // On envoi un message à tous les clients connectés
+        play.emit('connected_client', {username: username, usernameList: usernameList});
       }
     });
 
-    // Quand on reçoit le mot choisit par le dessinateur
-    socket.on('word', function(chosenWord) {
-      switch(chosenWord) {
-        case "first":
-          word = drawingWords[0];
-          break;
-        case "second":
-          word = drawingWords[1];
-          break;
-        case "third":
-          word = drawingWords[2];
-      }
+    // Quand l'hôte lance la partie
+    socket.on('launch_game', function() {
+      // On commence une nouvelle manche
+      newRound();
+    });
 
-      // On lance le compte à rebours de 60 secondes
+    // Quand on reçoit le mot choisit par le dessinateur
+    socket.on('wordToGuess', function(chosenWord) {
+      // On sauvegarde le mot choisit
+      word = chosenWord;
+
+      // On lance le compte à rebours de 60 secondes (61 secondes pour être identique à l'intervalle)
       timeout = setTimeout(countdown, 61000);
 
       // On lance l'affichage du compte à rebours
@@ -207,31 +221,26 @@ var play = io
       timeLeftCounter = setInterval(displayCountdown, 1000);
     });
 
-    // Quand l'hôte lance la partie
-    socket.on('launch_game', function() {
-      newRound();
-    });
-
     // Quand on reçoit une action de dessin
-    socket.on('drawingAction', function(data) {
-      // On le retransmet aux autres clients connectés
-      play.emit('drawingAction', data);
+    socket.on('drawing_action', function(data) {
+      // On la retransmet à tous les clients connectés
+      play.emit('drawing_action', data);
     });
 
     // Quand on reçoit un message du chat
-    socket.on('chatMessage', function(message) {
+    socket.on('chat_message', function(message) {
       // Si le message n'est pas vide
       if(message != '') {
-        // On le retransmet aux autres clients connectés
-        play.emit('chatMessage', {pseudo: socket.pseudo, message: message});
+        // On le retransmet à tous les clients connectés
+        play.emit('chat_message', {username: socket.username, message: message});
       }
 
       // Si le message correspond au mot choisit par le dessinateur et que ce n'est pas le dessinateur qui l'a écrit
-      if(message == word && drawingUser != socket.pseudo) {
+      if(message == word && drawingUser != socket.username) {
         // On indique au chat que le mot a été trouvé
-        play.emit('word_found', {word: word, pseudo: socket.pseudo})
+        play.emit('word_found', {chosenWord: word, username: socket.username})
 
-        // On lance un nouveau round
+        // On lance une nouvelle manche
         newRound();
       }
     });
@@ -239,29 +248,34 @@ var play = io
 
     // Quand le client se déconnecte
     socket.on('disconnect', function() {
-      // Si le pseudo est bien dans la liste, on le supprime
-      if(listePseudos.remove(socket.pseudo) != -1) {
+      // Si le nom d'utilisateur est bien dans la liste, on le supprime
+      // (pour éviter d'afficher le cas où un client rejoint la partie et quitte avant d'entrer son nom d'utilisateur)
+      if(usernameList.remove(socket.username) != -1) {
         // On l'écrit dans le log
-        console.log(`${socket.pseudo} déconnecté...`);
+        console.log(`${socket.username} déconnecté...`);
         // On envoi un message à tous les clients connectés à la page
-        play.emit('leaving_client', {pseudo: socket.pseudo, listePseudos: listePseudos});
+        play.emit('disconnected_client', {username: socket.username, usernameList: usernameList});
 
-        // S'il reste quelqu'un sur la page
-        if(listePseudos.getLength() > 0) {
-          // Si c'était l'utilisateur qui était en train de dessiner
-          if(socket.pseudo == drawingUser) {
+        // S'il reste au moins une personne sur la page
+        if(usernameList.getLength() > 0) {
+          // On regarde si le client était l'utilisateur qui était en train de dessiner
+          if(socket.username == drawingUser) {
+            // On lanche une nouvelle manche
             newRound();
           }
-          // Si personne ne dessinait et que c'était l'utilisteur qui devait lancer la partie
+          // Si personne ne dessinait
           if(drawingUser == null) {
-            play.emit('whos_drawing', {drawingUser: drawingUser, listePseudos: listePseudos});
+            play.emit('whos_drawing', {drawingUser: drawingUser, usernameList: usernameList});
           }
         }
       }
 
       // S'il n'y a plus personne sur le page
-      if(listePseudos.getLength() == 0) {
+      if(usernameList.getLength() == 0) {
+        // On réinitialise les variables
         drawingUser = null;
+        var word = null;
+
         // On arrête le compte à rebours
         clearTimeout(timeout);
         clearInterval(timeLeftCounter);
