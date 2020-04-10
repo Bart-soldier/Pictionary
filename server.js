@@ -5,26 +5,23 @@
 ***************************************/
 
 // Structure de liste en queue utilisée pour la liste de nom d'utilisateurs
+// Chaque élément de la liste a un nom d'utilisateur ([0]) et un score ([1])
 class Queue {
   constructor(...elements) {
     this.elements = [...elements];
   }
 
-  push(...args) {
-    return this.elements.push(...args);
+  push(username, score) {
+    let element = [username, score];
+    return this.elements.push(element);
   }
 
-  has(element) {
-    // On parcours le tableau
-    for(let i = 0; i < this.elements.length; i++) {
-      // Si on trouve l'élément
-      if(this.elements[i] == element) {
-        // On renvoi son index
-        return i;
-      }
-    }
-    // Sinon, on renvoi -1
-    return -1;
+  shift() {
+    return this.elements.shift();
+  }
+
+  pop() {
+    return this.elements.pop();
   }
 
   remove(element) {
@@ -48,20 +45,35 @@ class Queue {
     return index;
   }
 
-  removeFirstElement() {
-    // On récupère la première valeur du tableau
-    let returnValue = this.elements[0];
+  has(username) {
     // On parcours le tableau
-    for(let i = 0; i < this.elements.length - 1; i++) {
-      // On échange les valeurs afin d'avoir tous les éléments décalés d'une case vers la gauche
-      this.elements[i] = this.elements[i + 1];
+    for(let index = 0; index < this.elements.length; index++) {
+      // Si on trouve le nom d'utilisateur
+      if(this.elements[index][0] == username) {
+        // On renvoi son index
+        return index;
+      }
     }
 
-    // On met à jour la longueur du tableau
-    this.elements.length--;
+    // Sinon, on renvoi -1
+    return -1;
+  }
 
-    // On retourne la première valeur du tableau
-    return returnValue;
+  incrementScore(username) {
+    // On parcours le tableau
+    for(let index = 0; index < this.elements.length; index++) {
+      // Si on trouve le nom d'utilisateur
+      if(this.elements[index][0] == username) {
+        // On ajoute un point à son score
+        this.elements[index][1]++;
+
+        // On renvoi son index
+        return index;
+      }
+    }
+
+    // Sinon, on renvoi -1
+    return -1;
   }
 
   get(index) {
@@ -134,10 +146,14 @@ function newRound() {
   // Réinitialisation des variables
   word = null;
 
+  // On récupère le premier élément de la liste de nom d'utilisateur
+  let element = usernameList.shift();
+
   // Le dessinateur de cette manche est le premier nom d'utilisateur de la liste
-  drawingUser = usernameList.removeFirstElement();
+  drawingUser = element[0];
   // On le rajoute à la fin (boucle FIFO)
-  usernameList.push(drawingUser);
+  usernameList.push(element[0], element[1]);
+
 
   // On initialize les 3 choix possibles de mots à deviner
   wordsToGuess[0] = "word1";
@@ -189,8 +205,8 @@ var play = io
         // On encode le nom d'utilisateur par sécurité
         username = ent.encode(username);
         socket.username = username;
-        // On l'ajoute à la liste de nom d'utilisateur
-        usernameList.push(username);
+        // On l'ajoute à la liste de nom d'utilisateur et un score de 0
+        usernameList.push(username, 0);
 
         // On envoi au message au nouveau client pour lui indiquer qui dessine
         socket.emit('whos_drawing', {drawingUser: drawingUser, usernameList: usernameList});
@@ -245,6 +261,8 @@ var play = io
 
       // Si le message correspond au mot choisit par le dessinateur et que ce n'est pas le dessinateur qui l'a écrit
       if(message == word && drawingUser != socket.username) {
+        // On donne un point à celui qui a trouvé le mot
+        usernameList.incrementScore(socket.username);
         // On indique au chat que le mot a été trouvé
         play.emit('word_found', {chosenWord: word, username: socket.username})
 

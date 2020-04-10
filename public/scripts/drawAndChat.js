@@ -90,7 +90,9 @@ function updateConnectedPlayers(usernameList) {
   // On parcourt tous les nom d'utilisateur
   for(let i = 0; i < usernameList.elements.length; i++) {
     // On ajoute le nom d'utilisateur à la liste des joueurs connectés
-    $('#connectedPlayers').append('<p><em><strong>' + usernameList.elements[i] + '</strong></em></p><hr/>');
+    $('#connectedPlayers').append('<p><em><strong>' + usernameList.elements[i][0] + '</strong></em></p>');
+    // On ajoute le score à la liste des joueurs connectés
+    $('#connectedPlayers').append('<p><em><strong>Score : ' + usernameList.elements[i][1] + '</strong></em></p><hr/>');
   }
 }
 
@@ -267,15 +269,17 @@ $(document).ready(function(){
     // Si aucun utilisateur ne dessine
     else {
       // Si on est l'hôte (c'est-à-dire le premier utilisateur de la liste des noms d'utilisateur)
-      if(data.usernameList.elements[0] == myUsername) {
+      if(data.usernameList.elements[0][0] == myUsername) {
         // On affiche le boutton pour lancer la partie
         $('#drawingUser').replaceWith('<section id="drawingUser"></section>');
         document.getElementById("launchGame").style.display = 'block';
+        // On indique à l'hôte le nombre de joueurs minimum
+        $('#drawingUser').replaceWith(`<section id="drawingUser"><p><em><strong>Il faut au moins deux joueurs pour pouvoir jouer</strong></em></p></section>`);
       }
       // Sinon
       else {
         // On indique aux autres joueurs qui est l'hôte
-        $('#drawingUser').replaceWith(`<section id="drawingUser"><p><em><strong>C'est à ` + data.usernameList.elements[0] + ' de décider quand commencer la partie</strong></em></p></section>');
+        $('#drawingUser').replaceWith(`<section id="drawingUser"><p><em><strong>C'est à ` + data.usernameList.elements[0][0] + ' de décider quand commencer la partie</strong></em></p></section>');
       }
     }
   });
@@ -306,14 +310,14 @@ $(document).ready(function(){
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     // Si on est l'hôte
-    if(myUsername == usernameList.elements[0]) {
+    if(myUsername == usernameList.elements[0][0]) {
       // On remet le bouton pour lancer la partie
       document.getElementById("launchGame").style.display = 'block';
     }
     // Sinon
     else {
       // On indique aux autres joueurs qui est l'hôte
-      $('#drawingUser').replaceWith(`<section id="drawingUser"><p><em><strong>C'est à ` + data.usernameList.elements[0] + ' de décider quand commencer la partie</strong></em></p></section>');
+      $('#drawingUser').replaceWith(`<section id="drawingUser"><p><em><strong>C'est à ` + data.usernameList.elements[0][0] + ' de décider quand commencer la partie</strong></em></p></section>');
     }
   });
 
