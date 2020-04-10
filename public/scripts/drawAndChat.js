@@ -26,9 +26,9 @@ var nextDrawingUser;
 var wordsToGuess;
 
 // URL locale du serveur
-const url = 'http://localhost:8080/play';
+//const url = 'http://localhost:8080/play';
 // URL Heroku du serveur
-//const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
+const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
 
 /***************************************
 * Déclaration de fonctions
@@ -274,8 +274,8 @@ $(document).ready(function(){
       }
       // Sinon
       else {
-        // On écrit sur la page qui est l'hôte
-        $('#drawingUser').replaceWith(`<section id="drawingUser"><p><em><strong>C'est à ` + data.usernameList.elements[0] + ' de décider quand commencer la partie.</strong></em></p></section>');
+        // On indique aux autres joueurs qui est l'hôte
+        $('#drawingUser').replaceWith(`<section id="drawingUser"><p><em><strong>C'est à ` + data.usernameList.elements[0] + ' de décider quand commencer la partie</strong></em></p></section>');
       }
     }
   });
@@ -286,6 +286,35 @@ $(document).ready(function(){
     document.getElementById("launchGame").style.display = 'none';
     // On lance la partie
     socket.emit('launch_game');
+  });
+
+  // Quand on nous indique qu'il n'y a pas assez de joueurs pour lancer la partie
+  socket.on('not_enough_players', function(usernameList) {
+    // On indique à l'hôte qu'il n'y a pas assez de joueurs
+    $('#drawingUser').replaceWith(`<section id="drawingUser"><p><em><strong>Il faut au moins deux joueurs pour pouvoir jouer</strong></em></p></section>`);
+
+    // On réinitialize le compte à rebours
+    $('#countdown').replaceWith('<section id="countdown"></section>');
+
+    // On cache le choix des mots
+    document.getElementById("wordsToChoose").style.display = 'none';
+
+    // On cache la boîte à outil
+    document.getElementById("toolbox").style.display = 'none';
+
+    // On supprime l'indication
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Si on est l'hôte
+    if(myUsername == usernameList.elements[0]) {
+      // On remet le bouton pour lancer la partie
+      document.getElementById("launchGame").style.display = 'block';
+    }
+    // Sinon
+    else {
+      // On indique aux autres joueurs qui est l'hôte
+      $('#drawingUser').replaceWith(`<section id="drawingUser"><p><em><strong>C'est à ` + data.usernameList.elements[0] + ' de décider quand commencer la partie</strong></em></p></section>');
+    }
   });
 
   /***************************************

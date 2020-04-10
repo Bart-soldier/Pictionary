@@ -204,8 +204,16 @@ var play = io
 
     // Quand l'hôte lance la partie
     socket.on('launch_game', function() {
-      // On commence une nouvelle manche
-      newRound();
+      // S'il y a au moins deux joueurs
+      if(usernameList.getLength() > 1) {
+        // On commence une nouvelle manche
+        newRound();
+      }
+      // Sinon
+      else {
+        // On indique qu'il n'y a pas assez de joueurs à l'hôte de la partie
+        socket.emit('not_enough_players', usernameList);
+      }
     });
 
     // Quand on reçoit le mot choisit par le dessinateur
@@ -256,8 +264,8 @@ var play = io
         // On envoi un message à tous les clients connectés à la page
         play.emit('disconnected_client', {username: socket.username, usernameList: usernameList});
 
-        // S'il reste au moins une personne sur la page
-        if(usernameList.getLength() > 0) {
+        // S'il y a assez de joueurs pour pouvoir jouer
+        if(usernameList.getLength() > 1) {
           // On regarde si le client était l'utilisateur qui était en train de dessiner
           if(socket.username == drawingUser) {
             // On lanche une nouvelle manche
@@ -268,17 +276,20 @@ var play = io
             play.emit('whos_drawing', {drawingUser: drawingUser, usernameList: usernameList});
           }
         }
-      }
 
-      // S'il n'y a plus personne sur le page
-      if(usernameList.getLength() == 0) {
-        // On réinitialise les variables
-        drawingUser = null;
-        var word = null;
+        // S'il n'y a plus assez de joueurs pour pouvoir jouer
+        else {
+          // On réinitialise les variables
+          drawingUser = null;
+          var word = null;
 
-        // On arrête le compte à rebours
-        clearTimeout(timeout);
-        clearInterval(timeLeftCounter);
+          // On arrête le compte à rebours
+          clearTimeout(timeout);
+          clearInterval(timeLeftCounter);
+
+          // On indique le nouvel hôte
+          play.emit('not_enough_players', usernameList);
+        }
       }
     });
   });
