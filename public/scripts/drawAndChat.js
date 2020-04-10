@@ -26,9 +26,9 @@ var nextDrawingUser;
 var wordsToGuess;
 
 // URL locale du serveur
-//const url = 'http://localhost:8080/play';
+const url = 'http://localhost:8080/play';
 // URL Heroku du serveur
-const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
+//const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
 
 /***************************************
 * Déclaration de fonctions
@@ -104,6 +104,9 @@ function chooseWord(socket, chosenWord) {
 
   // On identifie le nextDrawingUser comme le drawingUser (il est maintenant autorisé à dessiner)
   drawingUser = nextDrawingUser;
+
+  // On écrit sur la page que l'on peut dessiner
+  $('#drawingUser').replaceWith('<section id="drawingUser"><p><em><strong>Vous êtes en train de dessiner...</strong></em></p></section>');
 
   // On rappelle le mot qu'il doit faire deviner
   $('#drawingUser').append('<p><em>Vous devez faire deviner le mot <strong>' + chosenWord + '</strong></em></p>');
@@ -249,8 +252,16 @@ $(document).ready(function(){
 
     // Si un utilisateur a été choisit pour dessiner
     if(data.drawingUser != null) {
-      // On écrit sur la page qui est cet utilisateur
-      $('#drawingUser').replaceWith('<section id="drawingUser"><p><em><strong>' + data.drawingUser + ' est en train de dessiner...</strong></em></p></section>');
+      // Si c'est nous
+      if(data.drawingUser == myUsername) {
+        // On l'écrit sur la page
+        $('#drawingUser').replaceWith('<section id="drawingUser"><p><em><strong>Vous êtes en train de dessiner...</strong></em></p></section>');
+
+      }
+      else {
+        // On écrit sur la page qui est cet utilisateur
+        $('#drawingUser').replaceWith('<section id="drawingUser"><p><em><strong>' + data.drawingUser + ' est en train de dessiner...</strong></em></p></section>');
+      }
     }
 
     // Si aucun utilisateur ne dessine
@@ -327,10 +338,17 @@ $(document).ready(function(){
     else {
       // On cache la boîte à outil
       document.getElementById("toolbox").style.display = 'none';
-      }
+    }
 
-    // On indique à tout le monde qui dessine
-    $('#drawingUser').replaceWith('<section id="drawingUser"><p><em><strong>' + nextDrawingUser + ' est en train de dessiner...</strong></em></p></section>');
+    // Si on doit choisir un mot
+    if(nextDrawingUser == myUsername) {
+      // On l'écrit sur la page
+      $('#drawingUser').replaceWith('<section id="drawingUser"><p><em><strong>Vous devez choisir un mot...</strong></em></p></section>');
+    }
+    else {
+      // On indique aux autres qui va dessiner
+      $('#drawingUser').replaceWith('<section id="drawingUser"><p><em><strong>' + data.drawingUser + ' est en train de dessiner...</strong></em></p></section>');
+    }
   });
 
   $("#firstWordButton").click(function() {
