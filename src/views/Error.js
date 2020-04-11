@@ -5,8 +5,8 @@ const Error = () => {
       <div className="Error">
         <div className="jumbotron text-center">
           <div className="container">
-            <h1>Error !</h1>
-            <p>This page does not exist.</p>
+            <h1>Projet Application Web</h1>
+            <p>Error...</p>
           </div>
         </div>
 
@@ -14,6 +14,7 @@ const Error = () => {
           <div id="greyBox" role="alert">
             <b>Error !</b> This page does not exist.
           </div>
+          <hr/>
         </div>
 
         <div className="w3-container w3-black w3-center w3-opacity w3-padding-64">
