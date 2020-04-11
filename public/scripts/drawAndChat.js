@@ -38,7 +38,7 @@ const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
 // jusqu'à ce que ce dernier soit unique et non nul
 async function getUsername(socket) {
   // On récupère le nom d'utilisateur
-  myUsername = prompt("Quel est votre nom d'utilisateur ?");
+  myUsername = prompt("Quel est votre nom d'utilisateur ?").trim();
   // On déclare le booléen utilisé pour savoir si le nom d'utilisateur est accepté
   let isUsernameAlreadyUsed = true;
 
@@ -46,7 +46,7 @@ async function getUsername(socket) {
   while(isUsernameAlreadyUsed) {
     // Tant que l'utilisateur n'a pas entré de nom d'utilisateur non nul
     while(myUsername == null || myUsername == '') {
-      myUsername = prompt("Vous devez entrer un nom d'utilisateur.\nQuel est votre nom d'utilisateur ?");
+      myUsername = prompt("Vous devez entrer un nom d'utilisateur.\nQuel est votre nom d'utilisateur ?").trim();
     }
 
     // On attend la promesse pour savoir si le nom d'utilisateur est déjà utilisé
@@ -54,7 +54,7 @@ async function getUsername(socket) {
 
     // Si le nom d'utilisateur est déjà utilisé
     if(isUsernameAlreadyUsed) {
-      myUsername = prompt(`Le nom d'utilisateur ${myUsername} est déjà utilisé. Merci d'en choisir un autre.\nQuel est votre nom d'utilisateur ?`);
+      myUsername = prompt(`Le nom d'utilisateur ${myUsername} est déjà utilisé. Merci d'en choisir un autre.\nQuel est votre nom d'utilisateur ?`).trim();
     }
   }
 }
@@ -156,7 +156,7 @@ $(document).ready(function(){
     $('#zone_chat').append('<p><em><strong>' + data.username + '</strong> a rejoint le chat !</em></p>');
 
     // Déplace la barre de défilement du chat au message le plus récent (le plus bas)
-    let scrollBar = document.getElementById("zone_chat");
+    let scrollBar = document.getElementById("chat");
     scrollBar.scrollTop = scrollBar.scrollHeight;
   });
 
@@ -175,7 +175,7 @@ $(document).ready(function(){
     $('#zone_chat').append('<p><em><strong>' + data.username + '</strong> a quitté le chat...</em></p>');
 
     // Déplace la barre de défilement du chat au message le plus récent (le plus bas)
-    let scrollBar = document.getElementById("zone_chat");
+    let scrollBar = document.getElementById("chat");
     scrollBar.scrollTop = scrollBar.scrollHeight;
   });
 
@@ -193,7 +193,7 @@ $(document).ready(function(){
     }
 
     // Déplace la barre de défilement du chat au message le plus récent (le plus bas)
-    let scrollBar = document.getElementById("zone_chat");
+    let scrollBar = document.getElementById("chat");
     scrollBar.scrollTop = scrollBar.scrollHeight;
   });
 

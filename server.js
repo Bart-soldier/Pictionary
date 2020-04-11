@@ -94,7 +94,7 @@ const favicon = require('express-favicon');
 const path = require('path');
 const http = require('http');
 const url_parser = require('url');
-let fs = require('fs');
+const fs = require('fs');
 const port = process.env.PORT || 8080;
 const app = express();
 const server = http.Server(app);
@@ -136,6 +136,93 @@ var timeLeftCounter; // Pour l'interval
 * Déclaration de fonctions
 ***************************************/
 
+// Fonction qui génère 3 mots aléatoirement depuis le fichier dictionary qui se trouve dans /public/listes
+// Les mots générés sont sauvegardés directement dans le tableau wordsToGuess
+function generateRandomWords() {
+  // Le dictionnaire de mots (chaque mot est suivi d'un saut de ligne)
+  // La première ligne de dictionary indique le nombre de mots dans le dictionnaire
+  // Ce dictionnaire de mots a été récupéré sur http://www.normalesup.org/~fradurand/liste_mots/
+  let file = "./public/listes/dictionary.txt";
+  // On lit le contenu du fichier
+  let text = fs.readFileSync(file).toString();
+  // On sépare chaque ligne
+  let textByLine = text.split("\n");
+  // On récupère le nombre de mots
+  let textSize = parseInt(textByLine[0]);
+
+  // On génère un nombre aléatoire entre 1 (premier mot dans le fichier) et textSize (dernier mot)
+  let firstInt = Math.ceil(Math.random() * textSize);
+  let secondInt = firstInt;
+  let thirdInt = firstInt;
+  // On génère un deuxième et un troisième nombre aléatoire, tous différents entre eux
+  while(firstInt == secondInt) {
+    secondInt = Math.ceil(Math.random() * textSize);
+  }
+  while(firstInt == thirdInt || secondInt == thirdInt) {
+    thirdInt = Math.ceil(Math.random() * textSize);
+  }
+
+  // On rempli le tableau wordsToGuess avec les mots choisis en enlevant les retours à la ligne
+  wordsToGuess[0] = textByLine[firstInt].replace(/(\r\n|\n|\r)/gm, "");
+  wordsToGuess[1] = textByLine[secondInt].replace(/(\r\n|\n|\r)/gm, "");
+  wordsToGuess[2] = textByLine[thirdInt].replace(/(\r\n|\n|\r)/gm, "");
+}
+
+// Fonction qui prend une chaîne de caractères, enlève les espaces inutiles et tous ses accents et la renvoi
+function removeSpecialCharacters(string) {
+  if(string != null) {
+    // On enlève les espaces avant et après le mot
+    string = string.trim();
+
+    // Remplace les lettres accentués par leurs équivalents sans accents
+    string = string.replace(/É|È|Ê|Ë/g,"E");
+    string = string.replace(/é|è|ê|ë/g,"e");
+    string = string.replace(/À|Â/g,"A");
+    string = string.replace(/à|â/g,"a");
+    string = string.replace(/Ù|Û|Ü/g,"U");
+    string = string.replace(/ù|û|ü/g,"u");
+    string = string.replace(/Î|Ï/g,"I");
+    string = string.replace(/î|ï/g,"i");
+    string = string.replace(/Ô|Ö/g,"O");
+    string = string.replace(/ô|ö/g,"o");
+    string = string.replace(/Ç/g,"C");
+    string = string.replace(/ç/g,"c");
+    string = string.replace(/Æ|æ/g,"ae");
+    string = string.replace(/Œ|œ/g,"oe");
+
+    // On enlève toutes les majuscules
+    string = string.replace(/A/g,"a");
+    string = string.replace(/B/g,"b");
+    string = string.replace(/C/g,"c");
+    string = string.replace(/D/g,"d");
+    string = string.replace(/E/g,"e");
+    string = string.replace(/F/g,"f");
+    string = string.replace(/G/g,"g");
+    string = string.replace(/H/g,"h");
+    string = string.replace(/I/g,"i");
+    string = string.replace(/J/g,"j");
+    string = string.replace(/K/g,"k");
+    string = string.replace(/L/g,"l");
+    string = string.replace(/M/g,"m");
+    string = string.replace(/N/g,"n");
+    string = string.replace(/O/g,"o");
+    string = string.replace(/P/g,"p");
+    string = string.replace(/Q/g,"q");
+    string = string.replace(/R/g,"r");
+    string = string.replace(/S/g,"s");
+    string = string.replace(/T/g,"t");
+    string = string.replace(/U/g,"u");
+    string = string.replace(/V/g,"v");
+    string = string.replace(/W/g,"w");
+    string = string.replace(/X/g,"x");
+    string = string.replace(/Y/g,"y");
+    string = string.replace(/Z/g,"z");
+  }
+  
+  // On renvoie la chaîne de caractères
+  return string;
+}
+
 // Fonction qui initialise une nouvelle manche
 // L'ordre de passage en tant que dessinateur est une boucle FIFO
 function newRound() {
@@ -154,11 +241,8 @@ function newRound() {
   // On le rajoute à la fin (boucle FIFO)
   usernameList.push(element[0], element[1]);
 
-
   // On initialize les 3 choix possibles de mots à deviner
-  wordsToGuess[0] = "word1";
-  wordsToGuess[1] = "word2";
-  wordsToGuess[2] = "word3";
+  generateRandomWords();
 
   // On envoi au message à tous les joueurs connectés pour lancer une nouvelle manche
   play.emit('new_round', {drawingUser: drawingUser, usernameList: usernameList, firstWord: wordsToGuess[0], secondWord: wordsToGuess[1], thirdWord: wordsToGuess[2]});
@@ -254,13 +338,13 @@ var play = io
     // Quand on reçoit un message du chat
     socket.on('chat_message', function(message) {
       // Si le message n'est pas vide
-      if(message != '') {
+      if(message.trim() != '') {
         // On le retransmet à tous les clients connectés
         play.emit('chat_message', {username: socket.username, message: message});
       }
 
       // Si le message correspond au mot choisit par le dessinateur et que ce n'est pas le dessinateur qui l'a écrit
-      if(message == word && drawingUser != socket.username) {
+      if(removeSpecialCharacters(message).localeCompare(removeSpecialCharacters(word)) == 0 && drawingUser != socket.username) {
         // On donne un point à celui qui a trouvé le mot
         usernameList.incrementScore(socket.username);
         // On indique au chat que le mot a été trouvé
