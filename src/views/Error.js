@@ -11,7 +11,7 @@ const Error = () => {
         </div>
 
         <div className="container">
-          <div className="alert alert-info text-center" role="alert">
+          <div id="greyBox" role="alert">
             <b>Error !</b> This page does not exist.
           </div>
         </div>
