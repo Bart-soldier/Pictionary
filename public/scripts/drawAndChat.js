@@ -38,7 +38,11 @@ const url = 'https://clerc-dejaham-pictionary.herokuapp.com/play';
 // jusqu'à ce que ce dernier soit unique et non nul
 async function getUsername(socket) {
   // On récupère le nom d'utilisateur
-  myUsername = prompt("Quel est votre nom d'utilisateur ?").trim();
+  myUsername = prompt("Quel est votre nom d'utilisateur ?");
+  // Si le nom d'utilisateur n'est pas null, on enlève les espaces inutiles
+  if(myUsername != null) {
+    myUsername = myUsername.trim();
+  }
   // On déclare le booléen utilisé pour savoir si le nom d'utilisateur est accepté
   let isUsernameAlreadyUsed = true;
 
@@ -46,7 +50,11 @@ async function getUsername(socket) {
   while(isUsernameAlreadyUsed) {
     // Tant que l'utilisateur n'a pas entré de nom d'utilisateur non nul
     while(myUsername == null || myUsername == '') {
-      myUsername = prompt("Vous devez entrer un nom d'utilisateur.\nQuel est votre nom d'utilisateur ?").trim();
+      myUsername = prompt("Vous devez entrer un nom d'utilisateur.\nQuel est votre nom d'utilisateur ?");
+      // Si le nom d'utilisateur n'est pas null, on enlève les espaces inutiles
+      if(myUsername != null) {
+        myUsername = myUsername.trim();
+      }
     }
 
     // On attend la promesse pour savoir si le nom d'utilisateur est déjà utilisé
@@ -54,7 +62,11 @@ async function getUsername(socket) {
 
     // Si le nom d'utilisateur est déjà utilisé
     if(isUsernameAlreadyUsed) {
-      myUsername = prompt(`Le nom d'utilisateur ${myUsername} est déjà utilisé. Merci d'en choisir un autre.\nQuel est votre nom d'utilisateur ?`).trim();
+      myUsername = prompt(`Le nom d'utilisateur ${myUsername} est déjà utilisé. Merci d'en choisir un autre.\nQuel est votre nom d'utilisateur ?`);
+      // Si le nom d'utilisateur n'est pas null, on enlève les espaces inutiles
+      if(myUsername != null) {
+        myUsername = myUsername.trim();
+      }
     }
   }
 }
